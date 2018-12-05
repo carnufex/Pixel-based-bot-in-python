@@ -7,6 +7,7 @@ import os
 import imageSearch
 import time
 import pyautogui
+from time import gmtime, strftime
 
 
 def getTasseractQuestion(image):
@@ -33,7 +34,11 @@ def getTasseractQuestion(image):
     ### debugging tools
     # cv2.imshow("Output", gray)
     # cv2.waitKey(0)
-    return eval(text)
+    try:
+        return eval(text)
+    except:
+        return None
+
 
 
 def getTasseractOptions(image):
@@ -96,28 +101,31 @@ def chooseOption(num, x ,y):
     optionY = getOptionCords("tmpOptions.png", num)
     pyautogui.moveTo(x+15, y+optionY)
     pyautogui.click(button="left")
-    time.sleep(3)
+    #time.sleep(3)
     pyautogui.press('enter')
     pyautogui.press('enter')
 
 
 def foundEssence(essence):
-    print("Please pos: ", essence[0], essence[1])
-    print("tmpQuestion loc: ", essence[0], essence[1]+15, essence[0]+45, essence[1]+25)
-    print("tmpOptions loc: ", essence[0], essence[1]+30, essence[0]+45, essence[1]+100)
+    #print("Please pos: ", essence[0], essence[1])
+    #print("tmpQuestion loc: ", essence[0], essence[1]+15, essence[0]+45, essence[1]+25)
+    #print("tmpOptions loc: ", essence[0], essence[1]+30, essence[0]+45, essence[1]+100)
     screenShot(essence[0], essence[1]+15, essence[0]+45, essence[1]+25, "tmpQuestion.png")
     question = getTasseractQuestion("tmpQuestion.png")
     print("problem: ", question)
-    screenShot(essence[0], essence[1]+30, essence[0]+45, essence[1]+100, "tmpOptions.png")
-    optionArr = getTasseractOptions("tmpOptions.png")
-    print("options: ", optionArr)
-    k = 1
-    for option in optionArr:
-        if int(option) == question:
-            print("blank")
-            #chooseOption(k, essence[0], essence[1]+30)
-        else:
-            k += 1
+    if question is not None:
+        screenShot(essence[0], essence[1]+30, essence[0]+45, essence[1]+100, "tmpOptions.png")
+        optionArr = getTasseractOptions("tmpOptions.png")
+        print("options: ", optionArr)
+        k = 1
+        for option in optionArr:
+            if int(option) == question:
+                chooseOption(k, essence[0], essence[1]+30)
+            else:
+                k += 1
+        return True
+    else:
+        return False
 
 def main():
     try:
@@ -126,10 +134,14 @@ def main():
         while True:
             essence = findEssenceVerification()
             if essence[0] != -1:
-                foundEssence(essence)
-                essencesFound += 1
-                print("You have now found: {} monster essences.".format(essencesFound))
-                print("Waiting for essence..")
+                success = foundEssence(essence)
+                if success:
+                    essencesFound += 1
+                    cTime = strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
+                    print("{0} - You have now found: {1} monster essence(s).".format(cTime, essencesFound))
+                    print("Waiting for essence..")
+                else:
+                    print("Question came back as None, what went wrong?")
                 essence = (-1, -1) # reset
             else:
                 # print("Waiting for essence..")
