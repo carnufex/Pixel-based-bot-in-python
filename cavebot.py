@@ -1,4 +1,5 @@
 import imageSearch as imgS
+import time
 
 waypoints = ["assets/checkmark-wpt.png", "assets/questionmark-wpt.png", "assets/exclimationmark-wpt.png", "assets/star-wpt.png", "assets/cross-wpt.png"]
 #waypoints = ["checkmark-wpt.png", "questionmark-wpt.png", "exclimationmark-wpt.png", "cross-wpt.png"]
@@ -20,8 +21,8 @@ def main():
                     # print("minimapPos", miniMapPos[0], miniMapPos[1], miniMapPos[2], miniMapPos[3])
                     wpt = imgS.imagesearcharea(wptImg, miniMapPos[0], miniMapPos[1], miniMapPos[2], miniMapPos[3], 0.7)
                     if wpt[0] is not -1:
-                        click_image(wptImg, (wpt[0]+miniMapPos[0], wpt[1]+miniMapPos[1]), "left", 1)
-                        time.sleep(10)
+                        imgS.click_image(wptImg, (wpt[0]+miniMapPos[0], wpt[1]+miniMapPos[1]), "left", 0)
+                        time.sleep(15)
                     else:
                         print("wpt not found")
             except KeyboardInterrupt:

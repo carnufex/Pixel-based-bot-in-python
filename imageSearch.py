@@ -45,7 +45,7 @@ the top left corner coordinates of the element if found as an array [x,y] or [-1
 def imagesearcharea(image, x1,y1,x2,y2, precision=0.8, im=None) :
     if im is None :
         im = region_grabber(region=(x1, y1, x2, y2))
-        im.save('testarea.png') #usefull for debugging purposes, this will save the captured region as "testarea.png"
+        # im.save('testarea.png') #usefull for debugging purposes, this will save the captured region as "testarea.png"
 
     img_rgb = np.array(im)
     img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
@@ -74,7 +74,7 @@ action : button of the mouse to activate : "left" "right" "middle", see pyautogu
 time : time taken for the mouse to move from where it was to the new position
 '''
 
-def click_image(image,pos,  action, timestamp,offset=5):
+def click_image(image, pos, action, timestamp,offset=5):
     img = cv2.imread(image)
     height, width, channels = img.shape
     pyautogui.moveTo(pos[0] + r(width / 2, offset), pos[1] + r(height / 2,offset),
@@ -179,6 +179,32 @@ def imagesearch_region_loop(image, timesample, x1, y1, x2, y2, precision=0.8):
         time.sleep(timesample)
         pos = imagesearcharea(image, x1, y1, x2, y2, precision)
     return pos
+
+'''
+Searchs for an image on a region of the screen continuously until it's found.
+
+input :
+images : set of paths to the image files (see opencv imread for supported types)
+time : Waiting time after failing to find the image
+x1 : top left x value
+y1 : top left y value
+x2 : bottom right x value
+y2 : bottom right y value
+precision : the higher, the lesser tolerant and fewer false positives are found default is 0.8
+
+returns :
+the top left corner coordinates of the element as an array [x,y] and path to image in a tuple ([x,y], path)
+
+'''
+def imagesearch_array_region_loop(images, timesample, x1, y1, x2, y2, precision=0.8):
+    pos = (-1, -1)
+
+    while pos[0] == -1:
+        for image in images:
+            pos = imagesearcharea(image, x1, y1, x2, y2, precision)
+            time.sleep(timesample)
+    print("returning: ", pos, image)
+    return pos, image
 
 '''
 Searches for an image on the screen and counts the number of occurrences.

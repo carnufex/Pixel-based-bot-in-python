@@ -72,13 +72,17 @@ def getTasseractOptions(image):
     ### debugging tools
     # cv2.imshow("Output", gray)
     # cv2.waitKey(0)
-    return arr
+
+    # Successfull OCR always gives an array with 5 elements.
+    if len(arr) == 5:
+        return arr
+    else:
+        return None
 
 def getOptionCords(img, number):
     img = cv2.imread(img)
     height, width, channels = img.shape
     return int((height/5) * number - (height/5)/2)
-
 
 def findEssenceVerification():
     verificationPos = imageSearch.imagesearch("assets/please.png")
@@ -88,9 +92,6 @@ def screenShot(x1, y1, x2, y2, name):
     img = imageSearch.region_grabber(region=(x1, y1, x2, y2))
     img.save(name)
 
-#print("problem: ", getTasseractQuestion("problem2.png"))
-#print("options: ", getTasseractOptions("onlygrey2.png"))
-pos = findEssenceVerification()
 
 def keyPress(key):
     pyautogui.keyDown(key)
@@ -101,7 +102,6 @@ def chooseOption(num, x ,y):
     optionY = getOptionCords("tmpOptions.png", num)
     pyautogui.moveTo(x+15, y+optionY)
     pyautogui.click(button="left")
-    #time.sleep(3)
     pyautogui.press('enter')
     pyautogui.press('enter')
 
@@ -116,14 +116,17 @@ def foundEssence(essence):
     if question is not None:
         screenShot(essence[0], essence[1]+30, essence[0]+45, essence[1]+100, "tmpOptions.png")
         optionArr = getTasseractOptions("tmpOptions.png")
-        print("options: ", optionArr)
-        k = 1
-        for option in optionArr:
-            if int(option) == question:
-                chooseOption(k, essence[0], essence[1]+30)
-            else:
-                k += 1
-        return True
+        if optionArr is not None:
+            print("options: ", optionArr)
+            k = 1
+            for option in optionArr:
+                if int(option) == question:
+                    chooseOption(k, essence[0], essence[1]+30)
+                else:
+                    k += 1
+            return True
+        else:
+            return False
     else:
         return False
 
@@ -141,14 +144,12 @@ def main():
                     print("{0} - You have now found: {1} monster essence(s).".format(cTime, essencesFound))
                     print("Waiting for essence..")
                 else:
-                    print("Question came back as None, what went wrong?")
+                    print("Question or problem OCR failed, still looking..")
+                    time.sleep(5)
                 essence = (-1, -1) # reset
             else:
-                # print("Waiting for essence..")
                 time.sleep(5)
     except KeyboardInterrupt:
         print("Stopped running due to KeyboardInterrupt")
 
 main()
-#keyPress('down')
-#print("cords: ", getOptionCords("tmpOptions.png", 3))
