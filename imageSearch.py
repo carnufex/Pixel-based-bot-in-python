@@ -126,7 +126,7 @@ the top left corner coordinates of the element if found as an array [x,y]
 def imagesearch_loop(image, timesample, precision=0.8):
     pos = imagesearch(image, precision)
     while pos[0] == -1:
-        print(image+" not found, waiting")
+        # print(image+" not found, waiting")
         time.sleep(timesample)
         pos = imagesearch(image, precision)
     return pos
@@ -235,3 +235,13 @@ def imagesearch_count(image, precision=0.9):
 
 def r(num, rand):
     return num + rand*random.random()
+
+# def find_rgb(color):
+#     img_rgb = pyautogui.screenshot()
+#     img_rgb = np.array(img_rgb)
+#     indices = np.where(img_rgb == color)
+#     #print("indices: ", indices[0])
+#     coordinates = zip(indices[0], indices[1])
+#     #print("coords: ", coordinates)
+#     unique_coordinates = list(set(list(coordinates)))
+#     print(unique_coordinates)

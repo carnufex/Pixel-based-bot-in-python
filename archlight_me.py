@@ -8,9 +8,10 @@ import imageSearch
 import time
 import pyautogui
 from time import gmtime, strftime
+import threading
 
 
-def getTasseractQuestion(image):
+def get_tesseract_question(image):
     # load the example image and convert it to grayscale
     image = cv2.imread(image)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -41,7 +42,7 @@ def getTasseractQuestion(image):
 
 
 
-def getTasseractOptions(image):
+def get_tesseract_options(image):
     # load the example image and convert it to grayscale
     image = cv2.imread(image)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -79,27 +80,22 @@ def getTasseractOptions(image):
     else:
         return None
 
-def getOptionCords(img, number):
+def get_option_coords(img, number):
     img = cv2.imread(img)
     height, width, channels = img.shape
     return int((height/5) * number - (height/5)/2)
 
-def findEssenceVerification():
+def find_essence_verification():
     verificationPos = imageSearch.imagesearch("assets/please.png")
     return verificationPos
 
-def screenShot(x1, y1, x2, y2, name):
+def screenshot(x1, y1, x2, y2, name):
     img = imageSearch.region_grabber(region=(x1, y1, x2, y2))
     img.save(name)
 
 
-def keyPress(key):
-    pyautogui.keyDown(key)
-    print("pressing down: ", key)
-    pyautogui.keyUp(key)
-
-def chooseOption(num, x ,y):
-    optionY = getOptionCords("tmpOptions.png", num)
+def choose_option(num, x ,y):
+    optionY = get_option_coords("tmpOptions.png", num)
     pyautogui.moveTo(x+15, y+optionY)
     pyautogui.click(button="left")
     pyautogui.press('enter')
@@ -110,18 +106,18 @@ def foundEssence(essence):
     #print("Please pos: ", essence[0], essence[1])
     #print("tmpQuestion loc: ", essence[0], essence[1]+15, essence[0]+45, essence[1]+25)
     #print("tmpOptions loc: ", essence[0], essence[1]+30, essence[0]+45, essence[1]+100)
-    screenShot(essence[0], essence[1]+15, essence[0]+45, essence[1]+25, "tmpQuestion.png")
-    question = getTasseractQuestion("tmpQuestion.png")
+    screenshot(essence[0], essence[1]+15, essence[0]+45, essence[1]+25, "tmpQuestion.png")
+    question = get_tesseract_question("tmpQuestion.png")
     print("problem: ", question)
     if question is not None:
-        screenShot(essence[0], essence[1]+30, essence[0]+45, essence[1]+100, "tmpOptions.png")
-        optionArr = getTasseractOptions("tmpOptions.png")
+        screenshot(essence[0], essence[1]+30, essence[0]+45, essence[1]+100, "tmpOptions.png")
+        optionArr = get_tesseract_options("tmpOptions.png")
         if optionArr is not None:
             print("options: ", optionArr)
             k = 1
             for option in optionArr:
                 if int(option) == question:
-                    chooseOption(k, essence[0], essence[1]+30)
+                    choose_option(k, essence[0], essence[1]+30)
                 else:
                     k += 1
             return True
@@ -130,26 +126,47 @@ def foundEssence(essence):
     else:
         return False
 
-def main():
+def find_essence():
+    found = False
+    print("Waiting for essence..")
+    while not found:
+        pos = imageSearch.imagesearch_loop('assets/me.png', 1, 0.8)
+        if pos[0] is not -1:
+            print("found !me", pos)
+            found = True
+            pyautogui.press('f12')
+
+
+
+def essence_bot(loop_delay):
+    essence_count = 0
     try:
-        print("Waiting for essence..")
-        essencesFound = 0
         while True:
-            essence = findEssenceVerification()
+            find_essence() # looping to find the green !me text.
+            time.sleep(1)
+            essence = find_essence_verification()
             if essence[0] != -1:
                 success = foundEssence(essence)
                 if success:
-                    essencesFound += 1
+                    essence_count += 1
                     cTime = strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
-                    print("{0} - You have now found: {1} monster essence(s).".format(cTime, essencesFound))
+                    print("{0} - You have now found: {1} monster essence(s).".format(cTime, essence_count))
                     print("Waiting for essence..")
                 else:
                     print("Question or problem OCR failed, still looking..")
-                    time.sleep(5)
+                    time.sleep(loop_delay)
                 essence = (-1, -1) # reset
             else:
-                time.sleep(5)
+                time.sleep(loop_delay)
     except KeyboardInterrupt:
         print("Stopped running due to KeyboardInterrupt")
 
+def main():
+    # Create two threads as follows
+    essence_bot_thread = threading.Thread(target=essence_bot, args=(5,))
+    try:
+       essence_bot_thread.start()
+    except:
+       print("Error: unable to start thread")
 main()
+#imageSearch.find_rgb((40, 246, 13))
