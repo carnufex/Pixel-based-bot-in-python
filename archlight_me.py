@@ -85,9 +85,6 @@ def get_option_coords(img, number):
     height, width, channels = img.shape
     return int((height/5) * number - (height/5)/2)
 
-def find_essence_verification():
-    verificationPos = imageSearch.imagesearch("assets/please.png")
-    return verificationPos
 
 def screenshot(x1, y1, x2, y2, name):
     img = imageSearch.region_grabber(region=(x1, y1, x2, y2))
@@ -137,36 +134,19 @@ def find_essence():
             pyautogui.press('f12')
 
 
-
-def essence_bot(loop_delay):
+def eb(loop_delay):
     essence_count = 0
-    try:
-        while True:
-            find_essence() # looping to find the green !me text.
-            time.sleep(1)
-            essence = find_essence_verification()
-            if essence[0] != -1:
-                success = foundEssence(essence)
-                if success:
-                    essence_count += 1
-                    cTime = strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
-                    print("{0} - You have now found: {1} monster essence(s).".format(cTime, essence_count))
-                    print("Waiting for essence..")
-                else:
-                    print("Question or problem OCR failed, still looking..")
-                    time.sleep(loop_delay)
-                essence = (-1, -1) # reset
-            else:
-                time.sleep(loop_delay)
-    except KeyboardInterrupt:
-        print("Stopped running due to KeyboardInterrupt")
-
-def main():
-    # Create two threads as follows
-    essence_bot_thread = threading.Thread(target=essence_bot, args=(5,))
-    try:
-       essence_bot_thread.start()
-    except:
-       print("Error: unable to start thread")
-main()
-#imageSearch.find_rgb((40, 246, 13))
+    me = imageSearch.imagesearch('assets/me.png')
+    if me[0] is not -1:
+        pyautogui.press('f12')
+    essence = imageSearch.imagesearch("assets/please.png")
+    if essence[0] != -1:
+        success = foundEssence(essence)
+        if success:
+            essence_count += 1
+            cTime = strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
+            print("{0} - You have now found: {1} monster essence(s).".format(cTime, essence_count))
+        else:
+            print("Question or problem OCR failed, still looking..")
+            time.sleep(loop_delay)
+        essence = (-1, -1) # reset
