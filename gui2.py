@@ -31,9 +31,11 @@ class GUI:
         #root.mainloop()
 
     def thread_handler(self, button):
+
         button_name = button["text"]
         button_status = button.config('relief')[-1]
         if button_name == "Hotkeys":
+            hk_thread = None
             if button_status == 'raised':
                 #button pressed
                 hk_thread = threading.Thread(target=hk_run)
@@ -44,12 +46,15 @@ class GUI:
                     print("Error: unable to start thread")
             else:
                 #stop thread
+                print("running?")
                 hk.stop()
+                if hk_thread is not None:
+                    hk_thread.join()
         elif button_name == "GFB":
             gfb_hk_thread = None
             if self.gfb_bool.get() is True:
                 #button pressed
-                gfb_hk_thread = threading.Thread(target=gfb_run, args=(400, 2))
+                gfb_hk_thread = threading.Thread(target=gfb_run, args=(300, 2))
                 try:
                     print("starting gfb hk")
                     gfb_hk_thread.start()
