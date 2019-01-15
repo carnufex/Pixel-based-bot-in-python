@@ -7,10 +7,18 @@
 * replace file eng.traineddata with the one from git repository in "C:\Program Files (x86)\Tesseract-OCR\tessdata"
 
 # Libraries
-pip install opencv-python pyautogui pytesseract pillow
+pip install opencv-python pyautogui pytesseract pillow 
+
+# Other
+AHK script included to keep window of choice on top with (ctrl + space)
 
 # TO:DO
-* Simulate mouse and key movement
+* add settings file
+** automaticly find some settings on init.
+** connect settings to GUI
+** change settings in GUI
+* add healing
+* add friend healing
 * Add support for multiple monitors
 * Support window being not in focus - screenshotting the process
 * Develop some kind of cavebot
