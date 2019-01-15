@@ -34,7 +34,7 @@ returns :
 an array of top left corner coordinates or [-1,-1] if not anything was found.
 
 '''
-def imagesearcharea_array(array, x1,y1,x2,y2, precision=0.8, im=None, offset_x=0, offset_y=0) :
+def imagesearcharea_array(array, x1,y1,x2,y2, precision=0.8, im=None) :
     if im is None :
         im = region_grabber(region=(x1, y1, x2, y2))
         # im.save('testarea.png') #usefull for debugging purposes, this will save the captured region as "testarea.png"
@@ -51,12 +51,25 @@ def imagesearcharea_array(array, x1,y1,x2,y2, precision=0.8, im=None, offset_x=0
         loc = np.where(res >= precision)
         for pt in zip(*loc[::-1]):
             cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0,0,255), -1)
-            matches.append((pt[0] + offset_x, pt[1] + offset_y))
+            matches.append((pt[0] + x1, pt[1] + y1))
     #cv2.imwrite('res.png',img_rgb)
     if len(matches) < 1:
         return [-1, -1]
     return matches
 
+'''
+
+Searchs for a coordinate that places as many coordinates as possible from list inside of a circle
+
+input :
+
+list : an array of coordinates [(x,y), ...]
+radius : radius of the circle
+
+returns :
+best possible coordinate along with amount of hits. ((x,y), amount)
+
+'''
 def aim_gfb(list, radius):
     x = 0
     y = 0
@@ -82,25 +95,53 @@ def aim_gfb(list, radius):
         flatten_tmp = [item for sublist in tmp for item in sublist]
         return aim_gfb(flatten_tmp[1::2], radius)
     else:
-        print("shooting at {0} monsters. Radius: {1}".format(i, radius))
         return ((x_c, y_c), i)
 
+'''
 
+Presses hotkey and then left clicks on coords
+
+input :
+
+hotkey : string with button name, e.g. 'f11'
+coords : tuple containing (x,y)
+
+'''
 def fire(hotkey, coords):
-    pyautogui.press(hotkey)
-    pyautogui.click(x=coords[0], y=coords[1], button="left")
+    #pyautogui.press(hotkey)
+    #pyautogui.click(x=coords[0], y=coords[1], button="left")
+    utilities.press('f11')
+    utilities.click(int(coords[0]), int(coords[1]))
 
+'''
 
-def run(radius, min_monsters):
+Searchs for an image within an area
+
+input :
+
+radius : radius of the circle
+min_monsters : least amount of occurances within circle to execute action (fire)
+hotkey : string with button name, e.g. 'f11'
+
+returns :
+an array of top left corner coordinates or [-1,-1] if not anything was found.
+
+'''
+def run(radius, rune, min_monsters, hotkey, start_coords, end_coords, config):
     start = time.time()
-    x,y = pyautogui.size()
-    start_x = int(x/5)
-    im = imgS.region_grabber(region=(start_x, 0, x-start_x, y))
-    coords_list = imagesearcharea_array(targets, 0, 0, x-(x/5), y, 0.7, im=im, offset_x=start_x)
+    im = imgS.region_grabber(region=(start_coords[0], start_coords[1], end_coords[0], end_coords[1]))
+    coords_list = imagesearcharea_array(targets, start_coords[0], start_coords[1], end_coords[0], end_coords[1], 0.7, im=im)
     if coords_list[0] is not -1:
         best = aim_gfb(coords_list, radius)
-        if best[1] >= 2:
-            fire('f11', best[0])
-            end = time.time()
-            print("total time:", end - start)
-            #pyautogui.moveTo(best[0])
+        if best[1] >= min_monsters:
+            cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS'][rune])
+            cooldown = utilities.has_cd(rune, cooldown_coords[0], cooldown_coords[1])
+            if not cooldown:
+                time1 = time.time()
+                fire(hotkey, best[0])
+                time2 = time.time()
+                print("shoot time: ", time2-time1)
+                end = time.time()
+                print("shooting at {0} monsters.    Radius: {1}     total time: {2}".format(best[1], radius, end - start))
+                #print("total time:", end - start)
+                #pyautogui.moveTo(best[0])

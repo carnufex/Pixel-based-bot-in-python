@@ -27,14 +27,21 @@ current = set()
 # Listener as global to easily stop it.
 listener = None
 gui = None
+config = None
+
+def on_press_helper(key):
+    for hk in config.items('SAVED_VARS'):
+        pressed = str(key).replace("Key.", "")
+        hotkey = hk[1].replace("'", "")
+        if pressed == hotkey:
+            button = gui.hotkey_arr[hk[0]]
+            button.invoke()
+
 
 def on_press(key):
-    if key == keyboard.Key.delete:
-        button_dict = dict(gui.hotkey_arr)
-        button = button_dict['GFB']
-        button.invoke()
-        #gui.gfb_checkbutton.invoke()
-    elif any([key in COMBO for COMBO in ScreenShot_HK]):
+    on_press_helper(key)
+
+    if any([key in COMBO for COMBO in ScreenShot_HK]):
         current.add(key)
         if any(all(k in current for k in COMBO) for COMBO in ScreenShot_HK):
             print ("saved screenshot")
@@ -50,10 +57,12 @@ def stop():
     listener.stop()
 
 
-def start(gui_class):
+def start(gui_class, config_parser):
     global listener
     global gui
+    global config
     gui = gui_class
+    config = config_parser
 
     listener = keyboard.Listener(on_press=on_press, on_release=on_release)
     listener.start()
