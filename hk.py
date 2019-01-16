@@ -34,7 +34,7 @@ def on_press_helper(key):
         pressed = str(key).replace("Key.", "")
         hotkey = hk[1].replace("'", "")
         if pressed == hotkey:
-            button = gui.hotkey_arr[hk[0]]
+            button = gui.hotkey_checkButton_dict[hk[0]]
             button.invoke()
 
 

@@ -58,10 +58,11 @@ def imagesearcharea(image, x1,y1,x2,y2, precision=0.8, im=None) :
     return max_loc
 
 
+
+
 '''
 
-click on the center of an image with a bit of random.
-eg, if an image is 100*100 with an offset of 5 it may click at 52,50 the first time and then 55,53 etc
+click on the center of an image with a bit of random.eg, if an image is 100*100 with an offset of 5 it may click at 52,50 the firs time and then 55,53 etc
 Usefull to avoid anti-bot monitoring while staying precise.
 
 this function doesn't search for the image, it's only ment for easy clicking on the images.

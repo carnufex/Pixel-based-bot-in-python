@@ -107,11 +107,12 @@ hotkey : string with button name, e.g. 'f11'
 coords : tuple containing (x,y)
 
 '''
-def fire(hotkey, coords):
+def fire(hotkey, coords=0):
     #pyautogui.press(hotkey)
     #pyautogui.click(x=coords[0], y=coords[1], button="left")
-    utilities.press('f11')
-    utilities.click(int(coords[0]), int(coords[1]))
+    utilities.press(hotkey)
+    if coords is not 0:
+        utilities.click(int(coords[0]), int(coords[1]))
 
 '''
 
@@ -145,3 +146,38 @@ def run(radius, rune, min_monsters, hotkey, start_coords, end_coords, config):
                 print("shooting at {0} monsters.    Radius: {1}     total time: {2}".format(best[1], radius, end - start))
                 #print("total time:", end - start)
                 #pyautogui.moveTo(best[0])
+
+
+def spellrotation(start_coords, end_coords, config, gui):
+    start = time.time()
+    active_spells = []
+
+
+    im = imgS.region_grabber(region=(start_coords[0], start_coords[1], end_coords[0], end_coords[1]))
+    coords_list = imagesearcharea_array(targets, start_coords[0], start_coords[1], end_coords[0], end_coords[1], 0.7, im=im)
+    #look for all active spells and add them to active spell list along with priority
+    for item in gui.checkButton_spell_bools:
+        if gui.checkButton_spell_bools[item].get() is True:
+            active_spells.append((config['PRIORITY'][item], item))
+    active_spells.sort()
+    for spell in active_spells:
+        amount = int(config['AMOUNT'][spell[1]])
+        hotkey = config['SAVED_VARS'][spell[1]]
+        if coords_list[0] is not -1: #no monster on screen
+            exoris = ['exori', 'exori_gran', 'exori_gran_ico']
+            if spell[1] in exoris:
+                #check how many monsters is in proximity to the character
+                proximity = 2
+                if proximity >= amount:
+                    fire(hotkey)
+            elif spell[1] == 'aoe_rune':
+                radius = pyautogui.size()
+                radius = int(radius[0] * 0.12)
+                best = aim_gfb(coords_list, radius)
+                if best[1] >= amount:
+                    cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS']['aoe_rune'])
+                    cooldown = utilities.has_cd('aoe_rune', cooldown_coords[0], cooldown_coords[1])
+                    if not cooldown:
+                        fire(hotkey, best[0])
+                        end = time.time()
+                        print("Time: ", end-start)
