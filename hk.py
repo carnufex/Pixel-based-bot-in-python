@@ -27,10 +27,9 @@ current = set()
 # Listener as global to easily stop it.
 listener = None
 gui = None
-config = None
 
 def on_press_helper(key):
-    for hk in config.items('SAVED_VARS'):
+    for hk in gui.config.items('SAVED_VARS'):
         pressed = str(key).replace("Key.", "")
         hotkey = hk[1].replace("'", "")
         if pressed == hotkey:
@@ -57,12 +56,11 @@ def stop():
     listener.stop()
 
 
-def start(gui_class, config_parser):
+def start(gui_class):
     global listener
     global gui
-    global config
     gui = gui_class
-    config = config_parser
+    config = gui.config
 
     listener = keyboard.Listener(on_press=on_press, on_release=on_release)
     listener.start()

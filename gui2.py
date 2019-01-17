@@ -17,6 +17,9 @@ class GUI:
         self.root.geometry('400x500')
         self.root.resizable(width=False, height=False)
 
+        self.config = configparser.ConfigParser()
+        self.config.read('config.ini')
+
         self.gfb_bool = tk.BooleanVar()
         self.checkButton_hk_bools = {}
         self.checkButton_spell_bools = {}
@@ -25,7 +28,8 @@ class GUI:
 
         self.hotkeys = []
         #loading all hk's into an array
-        for item in config.items('HOTKEYS'):
+        for item in self.config.items('HOTKEYS'):
+            print(item)
             self.hotkeys.append(item[0])
 
         names = ['Hotkeys', 'Spell rotation', 'Healing', 'Config', 'Instructions']
@@ -71,13 +75,13 @@ class GUI:
             if self.checkButton_hk_bools['spell_rotation'].get() is True:
                 #button pressed
                 # coords is loaded from file as strings, parsing back to tuple type.
-                start_coords = utilities.string2tuple(config['RESOLUTION']['game_start_coords'])
-                end_coords = utilities.string2tuple(config['RESOLUTION']['game_end_coords'])
+                start_coords = utilities.string2tuple(self.config['RESOLUTION']['game_start_coords'])
+                end_coords = utilities.string2tuple(self.config['RESOLUTION']['game_end_coords'])
                 # hotkey = config['SAVED_VARS']['GFB']
                 # print(hotkey)
 
                 #gfb_hk_thread = threading.Thread(target=gfb_run, args=(300, 'avalanche', 2, hotkey, start_coords, end_coords, config))
-                gfb_hk_thread = threading.Thread(target=gfb_run, args=(start_coords, end_coords, config, gui))
+                gfb_hk_thread = threading.Thread(target=gfb_run, args=(start_coords, end_coords, gui))
                 try:
                     print("starting spell rotation")
                     gfb_hk_thread.start()
@@ -129,17 +133,17 @@ class GUI:
         mouse_thread.start()
         result = que.get()
         mouse_thread.join()
-        config.set(section, item[0], str(result))
+        self.config.set(section, item[0], str(result))
         with open('config.ini', 'w') as configfile:
-            config.write(configfile)
+            self.config.write(configfile)
         self.update_text(text_field, result)
 
     def update_hotkeys(GUI_obj, category, item, amountObj):
         new_val = amountObj.get()
         #print('gui: {0}  category: {1}   item: {2}  new val: {3}'.format(GUI_obj, category, item, new_val))
-        config.set(category, item, new_val)
+        self.config.set(category, item, new_val)
         with open('config.ini', 'w') as configfile:
-            config.write(configfile)
+            self.config.write(configfile)
 
 
 
@@ -219,7 +223,7 @@ class GUI:
             i += 1
             info = 'Attack CD\'s'
             add_label(parent, info, i, 0, 3)
-            for item in config.items('ATTACK_COOLDOWNS'):
+            for item in self.config.items('ATTACK_COOLDOWNS'):
                 i += 1
                 print(item)
                 name = item[0].replace("_", " ")
@@ -231,7 +235,7 @@ class GUI:
             info = 'Healing CD\'s'
             add_label(parent, info, i, 0, 3)
             i += 1
-            for item in config.items('HEALING_COOLDOWNS'):
+            for item in self.config.items('HEALING_COOLDOWNS'):
                 print(item)
                 name = item[0].replace("_", " ")
                 name = name.lower()
@@ -242,7 +246,7 @@ class GUI:
 
         def load_config(parent):
             i = 0
-            for item in config.items('RESOLUTION'):
+            for item in self.config.items('RESOLUTION'):
                 label = item[0].replace("_", " ")
                 label = label.lower()
                 add_label(parent, label, i, 0)
@@ -256,19 +260,19 @@ class GUI:
             hotkey = tk.StringVar()
             amount = tk.StringVar()
             priority = tk.StringVar()
-            for save in config.items('SAVED_VARS'):
+            for save in self.config.items('SAVED_VARS'):
                 if name == save[0]:
                     hotkey.set(save[1])
                     break
                 else:
                     hotkey.set('None')
-            for save in config.items('AMOUNT'):
+            for save in self.config.items('AMOUNT'):
                 if name == save[0]:
                     amount.set(save[1])
                     break
                 else:
                     amount.set('None')
-            for save in config.items('PRIORITY'):
+            for save in self.config.items('PRIORITY'):
                 if name == save[0]:
                     priority.set(save[1])
                     break
@@ -297,7 +301,7 @@ class GUI:
             add_label(tab, 'Priority', i, 3)
 
             #iterating through every offensive attack
-            for item in config.items('ATTACK_COOLDOWNS'):
+            for item in self.config.items('ATTACK_COOLDOWNS'):
                 i += 1
                 #saving checkBox variables
                 bool = tk.BooleanVar()
@@ -349,20 +353,16 @@ class GUI:
 
 
 def hk_run():
-    hk.start(gui, config)
+    hk.start(gui)
 
 #def gfb_run(radius, rune, min_monsters, hotkey, start_coords, end_coords, config):
-def gfb_run(start_coords, end_coords, config, gui):
+def gfb_run(start_coords, end_coords, gui):
     pressed = gui.checkButton_hk_bools['spell_rotation'].get()
     while pressed:
-        gfb.spellrotation(start_coords, end_coords, config, gui)
+        gfb.spellrotation(start_coords, end_coords, gui)
         #gfb.run(radius, rune, min_monsters, hotkey, start_coords, end_coords, config)
         pressed = gui.checkButton_hk_bools['spell_rotation'].get()
         #pressed = gui.gfb_bool.get()
-
-config = configparser.ConfigParser()
-config.read('config.ini')
-
 
 
 gui = GUI()

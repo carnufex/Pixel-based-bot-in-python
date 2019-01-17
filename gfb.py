@@ -117,8 +117,9 @@ def fire(hotkey, coords=0):
 '''
 
 '''
-def spellrotation(start_coords, end_coords, config, gui):
+def spellrotation(start_coords, end_coords, gui):
     start = time.time()
+    config = gui.config
     active_spells = []
 
 
