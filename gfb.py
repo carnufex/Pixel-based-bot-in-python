@@ -8,10 +8,11 @@ import numpy as np
 from PIL import Image
 import math
 import utilities
+import sendInput
 
 #targets = ["assets/monsters/hp_bar.png"]
 targets = ["assets/monsters/troll.png", "assets/monsters/war_wolf.png", "assets/monsters/orc_rider.png", "assets/monsters/orc_spearman.png", \
-          "assets/monsters/orc_warrior.png"]
+          "assets/monsters/orc_warrior.png", "assets/monsters/orc_berserker.png"]
 #targets = ["assets/monsters/troll.png"]
 
 '''
@@ -108,46 +109,14 @@ coords : tuple containing (x,y)
 
 '''
 def fire(hotkey, coords=0):
-    #pyautogui.press(hotkey)
-    #pyautogui.click(x=coords[0], y=coords[1], button="left")
-    utilities.press(hotkey)
+    sendInput.send_key(hotkey)
     if coords is not 0:
-        utilities.click(int(coords[0]), int(coords[1]))
+        sendInput.send_click(coords[0], coords[1])
+
 
 '''
 
-Searchs for an image within an area
-
-input :
-
-radius : radius of the circle
-min_monsters : least amount of occurances within circle to execute action (fire)
-hotkey : string with button name, e.g. 'f11'
-
-returns :
-an array of top left corner coordinates or [-1,-1] if not anything was found.
-
 '''
-def run(radius, rune, min_monsters, hotkey, start_coords, end_coords, config):
-    start = time.time()
-    im = imgS.region_grabber(region=(start_coords[0], start_coords[1], end_coords[0], end_coords[1]))
-    coords_list = imagesearcharea_array(targets, start_coords[0], start_coords[1], end_coords[0], end_coords[1], 0.7, im=im)
-    if coords_list[0] is not -1:
-        best = aim_gfb(coords_list, radius)
-        if best[1] >= min_monsters:
-            cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS'][rune])
-            cooldown = utilities.has_cd(rune, cooldown_coords[0], cooldown_coords[1])
-            if not cooldown:
-                time1 = time.time()
-                fire(hotkey, best[0])
-                time2 = time.time()
-                print("shoot time: ", time2-time1)
-                end = time.time()
-                print("shooting at {0} monsters.    Radius: {1}     total time: {2}".format(best[1], radius, end - start))
-                #print("total time:", end - start)
-                #pyautogui.moveTo(best[0])
-
-
 def spellrotation(start_coords, end_coords, config, gui):
     start = time.time()
     active_spells = []
@@ -169,6 +138,7 @@ def spellrotation(start_coords, end_coords, config, gui):
                 #check how many monsters is in proximity to the character
                 proximity = 2
                 if proximity >= amount:
+                    print("FIRING EXORI")
                     fire(hotkey)
             elif spell[1] == 'aoe_rune':
                 radius = pyautogui.size()
@@ -178,6 +148,7 @@ def spellrotation(start_coords, end_coords, config, gui):
                     cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS']['aoe_rune'])
                     cooldown = utilities.has_cd('aoe_rune', cooldown_coords[0], cooldown_coords[1])
                     if not cooldown:
+                        print("FIRING AOE RUNE")
                         fire(hotkey, best[0])
                         end = time.time()
                         print("Time: ", end-start)

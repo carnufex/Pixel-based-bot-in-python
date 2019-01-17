@@ -18,12 +18,20 @@ class GUI:
         self.root.resizable(width=False, height=False)
 
         self.gfb_bool = tk.BooleanVar()
-        self.checkButton_bools = {}
-        self.hotkey_arr = {}
+        self.checkButton_hk_bools = {}
+        self.checkButton_spell_bools = {}
+        self.hotkey_checkButton_dict = {}
+        self.spell_checkButton_dict = {}
 
-        names = ['Hotkeys', 'Healing', 'Config', 'Instructions']
+        self.hotkeys = []
+        #loading all hk's into an array
+        for item in config.items('HOTKEYS'):
+            self.hotkeys.append(item[0])
+
+        names = ['Hotkeys', 'Spell rotation', 'Healing', 'Config', 'Instructions']
         self.nb = self.create_notebook(self.root, names)
         self.menu = self.create_menus(self.root)
+
 
 
 
@@ -47,34 +55,37 @@ class GUI:
                 #button pressed
                 hk_thread = threading.Thread(target=hk_run)
                 try:
-                    print("starting hk's")
+                    print("Hotkeys enabled")
                     hk_thread.start()
                 except:
                     print("Error: unable to start thread")
             else:
+                print("Hotkeys disabled")
                 #stop thread
-                print("running?")
                 hk.stop()
                 if hk_thread is not None:
                     hk_thread.join()
-        elif button_name == "GFB":
+        elif button_name == "spell rotation":
+            #print(self.checkButton_bools)
             gfb_hk_thread = None
-            if self.gfb_bool.get() is True:
+            if self.checkButton_hk_bools['spell_rotation'].get() is True:
                 #button pressed
                 # coords is loaded from file as strings, parsing back to tuple type.
                 start_coords = utilities.string2tuple(config['RESOLUTION']['game_start_coords'])
                 end_coords = utilities.string2tuple(config['RESOLUTION']['game_end_coords'])
-                hotkey = config['SAVED_VARS']['GFB']
-                print(hotkey)
+                # hotkey = config['SAVED_VARS']['GFB']
+                # print(hotkey)
 
-                gfb_hk_thread = threading.Thread(target=gfb_run, args=(300, 'avalanche', 2, hotkey, start_coords, end_coords, config))
+                #gfb_hk_thread = threading.Thread(target=gfb_run, args=(300, 'avalanche', 2, hotkey, start_coords, end_coords, config))
+                gfb_hk_thread = threading.Thread(target=gfb_run, args=(start_coords, end_coords, config, gui))
                 try:
-                    print("starting gfb hk")
+                    print("starting spell rotation")
                     gfb_hk_thread.start()
                 except:
                     print("Error: unable to start thread")
             else:
                 #stop thread
+                print("Stopping spell rotation")
                 if gfb_hk_thread is not None:
                     gfb_hk_thread.join()
 
@@ -123,9 +134,10 @@ class GUI:
             config.write(configfile)
         self.update_text(text_field, result)
 
-    def update_hotkeys(GUI_obj, hotkey, name):
-        print(hotkey, name)
-        config.set('SAVED_VARS', name, hotkey)
+    def update_hotkeys(GUI_obj, category, item, amountObj):
+        new_val = amountObj.get()
+        #print('gui: {0}  category: {1}   item: {2}  new val: {3}'.format(GUI_obj, category, item, new_val))
+        config.set(category, item, new_val)
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
 
@@ -157,15 +169,24 @@ class GUI:
             button.grid(row=row, column=column, sticky=tk.N, pady=10, padx=10)
             return button
 
-        def add_checkButton(parent, text, variable, command, row, column):
+        def add_checkButton_hk(parent, text, variable, command, row, column):
             try:
-                variable = self.checkButton_bools[text]
+                variable = self.checkButton_hk_bools[text]
             except:
                 print("Didn\'t find the bool connected to checkbox")
             check_button = tk.Checkbutton(parent, text=text.replace("_", " "), variable=variable, command=lambda: command(check_button), onvalue=True, offvalue=False)
             check_button.grid(row=row, column=column, sticky=tk.N, pady=10, padx=10)
-            self.hotkey_arr[text] = check_button
-            # self.hotkey_arr.append((text, check_button))
+            self.hotkey_checkButton_dict[text] = check_button
+            return check_button
+
+        def add_checkButton_spell(parent, text, variable, command, row, column):
+            try:
+                variable = self.checkButton_spell_bools[text]
+            except:
+                print("Didn\'t find the bool connected to checkbox")
+            check_button = tk.Checkbutton(parent, text=text.replace("_", " "), variable=variable, command=lambda: command(check_button), onvalue=True, offvalue=False)
+            check_button.grid(row=row, column=column, sticky=tk.N, pady=10, padx=10)
+            self.spell_checkButton_dict[text] = check_button
             return check_button
 
         def add_text(parent, text, width, height, row, col, state='normal'):
@@ -175,9 +196,9 @@ class GUI:
             text_field.grid(row=row, column=col, sticky=tk.N, pady=10, padx=10)
             return text_field
 
-        def add_optionMenu(parent, hotkey, option_list, command, item, row, col):
-            option = tk.OptionMenu(parent, hotkey, *option_list, command=lambda var: command(var, item))
-            option.grid(row=row, column=0, sticky=tk.N, pady=10, padx=10)
+        def add_optionMenu(parent, variable, option_list, command, category, item, row, col):
+            option = tk.OptionMenu(parent, variable, *option_list, command=lambda var: command(category, item, variable))
+            option.grid(row=row, column=col, sticky=tk.N, pady=10, padx=10)
 
 
 
@@ -231,38 +252,72 @@ class GUI:
             cooldown_button = tk.Button(parent, text="Cooldowns", command=cooldown_window)
             cooldown_button.grid(row=i, column=1, sticky=tk.N, pady=10, padx=10)
 
+        def load_spell_settings(name):
+            hotkey = tk.StringVar()
+            amount = tk.StringVar()
+            priority = tk.StringVar()
+            for save in config.items('SAVED_VARS'):
+                if name == save[0]:
+                    hotkey.set(save[1])
+                    break
+                else:
+                    hotkey.set('None')
+            for save in config.items('AMOUNT'):
+                if name == save[0]:
+                    amount.set(save[1])
+                    break
+                else:
+                    amount.set('None')
+            for save in config.items('PRIORITY'):
+                if name == save[0]:
+                    priority.set(save[1])
+                    break
+                else:
+                    priority.set('None')
+            return (hotkey, amount, priority)
+
         def load_hotkeys(parent):
-            i = 0
-            hotkeys = []
-            variables = []
-            variable = tk.StringVar()
-            add_label(tab, 'HOTKEYS:    ', 0, 0)
-            add_button_thread(tab, "Hotkeys", self.button_thread, 0, 1, columnspan=3)
-            for item in config.items('HOTKEYS'):
-                hotkeys.append(item[0])
+            add_label(parent, 'Enable all hotkeys: ', 0, 0)
+            add_button_thread(parent, "Hotkeys", self.button_thread, 0, 1, columnspan=3)
+            hotkey, trash, trash = load_spell_settings('spell_rotation')
+            #hotkey = tk.StringVar()
+            add_optionMenu(parent, hotkey, self.hotkeys, self.update_hotkeys, 'SAVED_VARS', 'spell_rotation', 1, 0)
+            #spell rotation
+            bool = tk.BooleanVar()
+            self.checkButton_hk_bools['spell_rotation'] = bool
+            add_checkButton_hk(parent, 'spell_rotation', self.checkButton_hk_bools['spell_rotation'], self.button_thread, 1, 1)
+
+
+
+        def load_spell_rotation(parent):
+            i = 1
+            add_label(tab, 'Hotkey', i, 0)
+            add_label(tab, 'Active', i, 1)
+            add_label(tab, 'Min monsters', i, 2)
+            add_label(tab, 'Priority', i, 3)
+
+            #iterating through every offensive attack
             for item in config.items('ATTACK_COOLDOWNS'):
                 i += 1
-                hotkey = tk.StringVar()
+                #saving checkBox variables
                 bool = tk.BooleanVar()
-                self.checkButton_bools[item[0]] = bool
+                self.checkButton_spell_bools[item[0]] = bool
                 # mapping saved hotkeys to hotkeys
-                for save in config.items('SAVED_VARS'):
-                    if item[0] == save[0]:
-                        hotkey.set(save[1])
-                        break
-                    else:
-                        hotkey.set(hotkeys[0])
-                variables.append(hotkey)
-                add_optionMenu(parent, hotkey, hotkeys, self.update_hotkeys, item[0], i, 0)
-                add_checkButton(tab, item[0], self.checkButton_bools[item[0]], self.button_thread, i, 1)
-
-
-
+                tk_hotkey, tk_amount, tk_priority = load_spell_settings(item[0])
+                #adding buttons
+                add_optionMenu(parent, tk_hotkey, self.hotkeys, self.update_hotkeys, 'SAVED_VARS', item[0], i, 0)
+                add_checkButton_spell(parent, item[0], self.checkButton_spell_bools[item[0]], self.button_thread, i, 1)
+                add_optionMenu(parent, tk_amount, [str(i) for i in range(10)], self.update_hotkeys, 'AMOUNT', item[0], i, 2)
+                add_optionMenu(parent, tk_priority, [str(i) for i in range(10)], self.update_hotkeys, 'PRIORITY', item[0], i, 3)
 
 
         # hotkeys tab
         tab = nb.tabs['Hotkeys']
         load_hotkeys(tab)
+
+        #spell rotation tabs
+        tab = nb.tabs['Spell rotation']
+        load_spell_rotation(tab)
 
 
 
@@ -296,12 +351,14 @@ class GUI:
 def hk_run():
     hk.start(gui, config)
 
-def gfb_run(radius, rune, min_monsters, hotkey, start_coords, end_coords, config):
-    pressed = gui.gfb_bool.get()
-    print("pressed: ", pressed)
+#def gfb_run(radius, rune, min_monsters, hotkey, start_coords, end_coords, config):
+def gfb_run(start_coords, end_coords, config, gui):
+    pressed = gui.checkButton_hk_bools['spell_rotation'].get()
     while pressed:
-        gfb.run(radius, rune, min_monsters, hotkey, start_coords, end_coords, config)
-        pressed = gui.gfb_bool.get()
+        gfb.spellrotation(start_coords, end_coords, config, gui)
+        #gfb.run(radius, rune, min_monsters, hotkey, start_coords, end_coords, config)
+        pressed = gui.checkButton_hk_bools['spell_rotation'].get()
+        #pressed = gui.gfb_bool.get()
 
 config = configparser.ConfigParser()
 config.read('config.ini')

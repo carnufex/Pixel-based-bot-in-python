@@ -34,11 +34,6 @@ def detect_mouse_click(arg):
     time.sleep(0.001)
 
 
-def click(x,y):
-    win32api.SetCursorPos((x,y))
-    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x,y,0,0)
-    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x,y,0,0)
-
 def string2tuple(old_string):
     new_tuple = tuple(int(x) for x in old_string[1:-1].split(','))
     return new_tuple
@@ -87,14 +82,11 @@ def key2hex(key):
     return hex_int
 
 
-def press(key):
-    hex = key2hex(key)
-    win32api.keybd_event(hex,0,0,0)
 
-def init():
-    appname = "Tibia"
-    window = win32gui.FindWindow(None, appname)
-    try:
-        win32gui.SetForegroundWindow(window)
-    except:
-        pass
+# def init():
+#     appname = "Tibia"
+#     window = win32gui.FindWindow(None, appname)
+#     try:
+#         win32gui.SetForegroundWindow(window)
+#     except:
+#         pass
