@@ -57,6 +57,11 @@ typings/
 # dotenv environment variables file
 .env
 
-.png
+*.png
 /tmp/*
+
+output/
+tmp/
+.vs/
+__pycache__/
 

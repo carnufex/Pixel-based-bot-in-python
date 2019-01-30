@@ -3,7 +3,6 @@ import imageSearch as imgS
 import time
 import pyautogui
 import os
-import gfb
 
 
 def ss_wpt(size):
@@ -29,7 +28,7 @@ listener = None
 gui = None
 
 def on_press_helper(key):
-    for hk in gui.config.items('SAVED_VARS'):
+    for hk in gui.config.items('SAVED_HOTKEYS'):
         pressed = str(key).replace("Key.", "")
         hotkey = hk[1].replace("'", "")
         if pressed == hotkey:

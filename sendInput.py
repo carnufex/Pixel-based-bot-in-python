@@ -13,11 +13,23 @@ def make_pycwnd(hwnd):
     PyCWnd = win32ui.CreateWindowFromHandle(hwnd)
     return PyCWnd
 
-hotkey_dict = {'f11': win32con.VK_F11}
+hotkey_dict = { 'f1': win32con.VK_F1,
+                'f2': win32con.VK_F2,
+                'f3': win32con.VK_F3,
+                'f4': win32con.VK_F4,
+                'f5': win32con.VK_F5,
+                'f6': win32con.VK_F6,
+                'f7': win32con.VK_F7,
+                'f8': win32con.VK_F8,
+                'f9': win32con.VK_F9,
+                'f10': win32con.VK_F10,
+                'f11': win32con.VK_F11,
+                'f12': win32con.VK_F12
+                }
 
 def send_keyboard_input(pycwnd, hotkey=None, msg=None):
     #send_click_input(pycwnd, 15, 15)
-    if hotkey.lower() == 'f11':
+    if hotkey.lower() in hotkey_dict:
         pycwnd.SendMessage(win32con.WM_KEYDOWN, hotkey_dict[hotkey.lower()], 0)
         pycwnd.SendMessage(win32con.WM_KEYUP, hotkey_dict[hotkey.lower()], 0)
     elif msg is not None:

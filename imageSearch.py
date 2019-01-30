@@ -229,9 +229,9 @@ def imagesearch_count(image, precision=0.9):
     loc = np.where(res >= precision)
     count = 0
     for pt in zip(*loc[::-1]):  # Swap columns and rows
-        #cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2) // Uncomment to draw boxes around found occurances
+        #cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2) # Uncomment to draw boxes around found occurances
         count = count + 1
-    #cv2.imwrite('result.png', img_rgb) // Uncomment to write output image with boxes drawn around occurances
+    #cv2.imwrite('result.png', img_rgb) # Uncomment to write output image with boxes drawn around occurances
     return count
 
 def r(num, rand):

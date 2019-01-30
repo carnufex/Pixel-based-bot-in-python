@@ -108,7 +108,7 @@ hotkey : string with button name, e.g. 'f11'
 coords : tuple containing (x,y)
 
 '''
-def fire(hotkey, coords=0):
+def fire(hotkey, coords=0, gui=None):
     sendInput.send_key(hotkey)
     if coords is not 0:
         sendInput.send_click(coords[0], coords[1])
@@ -126,13 +126,18 @@ def spellrotation(start_coords, end_coords, gui):
     im = imgS.region_grabber(region=(start_coords[0], start_coords[1], end_coords[0], end_coords[1]))
     coords_list = imagesearcharea_array(targets, start_coords[0], start_coords[1], end_coords[0], end_coords[1], 0.7, im=im)
     #look for all active spells and add them to active spell list along with priority
-    for item in gui.checkButton_spell_bools:
-        if gui.checkButton_spell_bools[item].get() is True:
-            active_spells.append((config['PRIORITY'][item], item))
+    for item in gui.all_spells_dict['attack']:
+        item_tuple = (config['PRIORITY'][item], item)
+        if gui.all_bools[item].get() is True:
+            active_spells.append(item_tuple)
+        elif item in active_spells:
+            #spell has been toggled off, remove from active spells.
+            active_spells.remove(item_tuple)
+
     active_spells.sort()
     for spell in active_spells:
         amount = int(config['AMOUNT'][spell[1]])
-        hotkey = config['SAVED_VARS'][spell[1]]
+        hotkey = config['SAVED_HOTKEYS'][spell[1]]
         if coords_list[0] is not -1: #no monster on screen
             exoris = ['exori', 'exori_gran', 'exori_gran_ico']
             if spell[1] in exoris:
@@ -150,6 +155,6 @@ def spellrotation(start_coords, end_coords, gui):
                     cooldown = utilities.has_cd('aoe_rune', cooldown_coords[0], cooldown_coords[1])
                     if not cooldown:
                         print("FIRING AOE RUNE")
-                        fire(hotkey, best[0])
+                        fire(hotkey, best[0], gui)
                         end = time.time()
-                        print("Time: ", end-start)
+                        print("Spell rotation time: ", end-start)
