@@ -61,13 +61,16 @@ def send_keyboard_input(pycwnd, hotkey=None, msg=None):
 # msg = "f11"
 # send_keyboard_input(pycwnd,msg)
 # send_click_input(pycwnd, 1170, 550)
-title = 'Tibia - George sadfrog'
-def send_key(hotkey, msg=None):
+
+
+
+
+def send_key(hotkey, msg=None, title=None):
     whndl = get_whndl(title)
     pycwnd = make_pycwnd(whndl)
     send_keyboard_input(pycwnd, hotkey, msg)
 
-def send_click(x, y):
+def send_click(x, y, title):
     whndl = get_whndl(title)
     pycwnd = make_pycwnd(whndl)
     send_click_input(pycwnd, x, y)

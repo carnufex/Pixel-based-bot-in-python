@@ -1,5 +1,5 @@
 from pynput import keyboard
-import imageSearch as imgS
+from lib import imageSearch as imgS
 import time
 import pyautogui
 import os
@@ -34,6 +34,7 @@ def on_press_helper(key):
         if pressed == hotkey:
             button = gui.hotkey_checkButton_dict[hk[0]]
             button.invoke()
+            break
 
 
 def on_press(key):

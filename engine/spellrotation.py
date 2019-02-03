@@ -1,19 +1,17 @@
-import imageSearch as imgS
+from lib import imageSearch as imgS
 import time
 import msvcrt
-import pyautogui
 import os
 import cv2
 import numpy as np
 from PIL import Image
 import math
-import utilities
-import sendInput
+from lib import utilities, sendInput
 
 #targets = ["assets/monsters/hp_bar.png"]
 targets = ["assets/monsters/troll.png", "assets/monsters/war_wolf.png", "assets/monsters/orc_rider.png", "assets/monsters/orc_spearman.png", \
           "assets/monsters/orc_warrior.png", "assets/monsters/orc_berserker.png"]
-#targets = ["assets/monsters/troll.png"]
+# targets = ["assets/monsters/swampling.png", "assets/monsters/emerald_damselfly.png"]
 
 '''
 
@@ -98,20 +96,32 @@ def aim_gfb(list, radius):
     else:
         return ((x_c, y_c), i)
 
+
 '''
-
 Presses hotkey and then left clicks on coords
-
 input :
-
 hotkey : string with button name, e.g. 'f11'
 coords : tuple containing (x,y)
-
 '''
-def fire(hotkey, coords=0, gui=None):
-    sendInput.send_key(hotkey)
+def fire(hotkey, coords, gui):
+    sendInput.send_key(hotkey, title=gui.title)
     if coords is not 0:
-        sendInput.send_click(coords[0], coords[1])
+        sendInput.send_click(coords[0], coords[1], gui.title)
+
+
+def proximity(list, range, x1, y1, x2, y2):
+    x_center = ((x2-x1)/2)+x1
+    y_center = ((y2-y1)/2)+y1
+    results = []
+    for coord in list:
+        x_point = coord[0]
+        y_point = coord[1]
+        distance = math.sqrt((x_point - x_center)**2 + (y_point - y_center)**2)
+        if distance <= range:
+            results.append(coord)
+    return results
+
+
 
 
 '''
@@ -140,21 +150,35 @@ def spellrotation(start_coords, end_coords, gui):
         hotkey = config['SAVED_HOTKEYS'][spell[1]]
         if coords_list[0] is not -1: #no monster on screen
             exoris = ['exori', 'exori_gran', 'exori_gran_ico']
+            strikes = ['exori_frigo', 'exori_vis', 'exori_flam', 'exori_mort', 'exori_tera', 'noob_strike']
+            x1, y1 = utilities.string2tuple(gui.config.get('GAMEWINDOW', 'game_start_coords'))
+            x2, y2 = utilities.string2tuple(gui.config.get('GAMEWINDOW', 'game_end_coords'))
+            game_width = x2 - x1
             if spell[1] in exoris:
-                #check how many monsters is in proximity to the character
-                proximity = 2
-                if proximity >= amount:
-                    print("FIRING EXORI")
-                    fire(hotkey)
-            elif spell[1] == 'aoe_rune':
-                radius = pyautogui.size()
-                radius = int(radius[0] * 0.12)
-                best = aim_gfb(coords_list, radius)
-                if best[1] >= amount:
-                    cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS']['aoe_rune'])
-                    cooldown = utilities.has_cd('aoe_rune', cooldown_coords[0], cooldown_coords[1])
+                radius = (game_width *0.25)
+                prox = proximity(coords_list, radius, x1, y1, x2, y2)
+                if len(prox) >= amount:
+                    cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS'][spell[1]])
+                    cooldown = utilities.has_cd(spell[1], cooldown_coords[0], cooldown_coords[1])
                     if not cooldown:
+                        sendInput.send_key(hotkey, title=gui.title)
+            elif spell[1] == 'aoe_rune':
+                cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS'][spell[1]])
+                cooldown = utilities.has_cd(spell[1], cooldown_coords[0], cooldown_coords[1])
+                if not cooldown:
+                    radius = (game_width * 0.40)
+                    best = aim_gfb(coords_list, radius)
+                    if best[1] >= amount:
                         print("FIRING AOE RUNE")
                         fire(hotkey, best[0], gui)
                         end = time.time()
                         print("Spell rotation time: ", end-start)
+
+            elif spell[1] in strikes:
+                radius = (game_width * 0.4)
+                prox = proximity(coords_list, radius, x1, y1, x2, y2)
+                if len(prox) >= amount:
+                    cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS'][spell[1]])
+                    cooldown = utilities.has_cd(spell[1], cooldown_coords[0], cooldown_coords[1])
+                    if not cooldown:
+                        sendInput.send_key(hotkey, title=gui.title)
