@@ -81,6 +81,10 @@ def get_curr(empty_key, deviation):
             current_pc = pixels2percent(start[0], end[0], current_px[0])
             return int(current_pc)
         return None
+    else:
+        print("Couldn't find current hp, try restarting. \n \
+        Are 'show status bar' toggled in Tibia options? \n \
+        Advanced settings, Interface -> HUD at the bottom")
 
 
 
@@ -103,20 +107,30 @@ def heal(hotkey, gui):
 def heal_engine(gui):
     hp = get_curr('hp_empty', 10)
     mp = get_curr('mp_empty', 10)
+    config = gui.config
     if hp is not None and mp is not None:
-        if hp < int(gui.config['SAVED_VALUES']['low_healing']) : #AND IF LOW HEALING I CHECKED
-            heal(gui.config['SAVED_HOTKEYS']['low_healing'], gui)
-        elif mp < int(gui.config['SAVED_VALUES']['mana_pot']):
-            print("mp < SAVED_VALUE", mp, gui.config['SAVED_VALUES']['mana_pot'])
-            heal(gui.config['SAVED_HOTKEYS']['mana_pot'], gui)
-        #### SIO HERE ? ####
-        if gui.checkButton_hk_bools['heal_friend'].get():
+        ### HEALTH POTS ###
+        type = 'low_health_potion'
+        if hp < config.getint('SAVED_VALUES', 'low_health_potion') and gui.all_bools['low_health_potion'].get():
+            heal(config.get('SAVED_HOTKEYS', 'low_health_potion'), gui)
+        elif hp < config.getint('SAVED_VALUES', 'high_health_potion') and gui.all_bools['high_health_potion'].get():
+            heal(config.get('SAVED_HOTKEYS', 'high_health_potion'), gui)
+        ### SPELL HEALING ### !!!! LOW_HP -> SIO if active -> HIGH HEALING
+        if hp < config.getint('SAVED_VALUES', 'low_spell_healing') and gui.all_bools['low_spell_healing'].get():
+            heal(config.get('SAVED_HOTKEYS', 'low_spell_healing'), gui)
+        elif gui.checkButton_hk_bools['heal_friend'].get():
             names = gui.config.get('HEAL_FRIEND', 'names').split(', ')
             print(names)
             for name in names:
                 healFriend.heal_friend(gui, name)
-        elif hp < int(gui.config['SAVED_VALUES']['high_healing']):
-            heal(gui.config['SAVED_HOTKEYS']['high_healing'], gui)
+        elif hp < config.getint('SAVED_VALUES', 'high_spell_healing') and gui.all_bools['high_spell_healing'].get():
+            heal(config.get('SAVED_HOTKEYS', 'high_spell_healing'), gui)
+        ### MANA POTION ###
+        if mp < config.getint('SAVED_VALUES', 'low_mana_potion') and gui.all_bools['low_mana_potion'].get():
+            heal(config.get('SAVED_HOTKEYS', 'low_mana_potion'), gui)
+        elif mp < config.getint('SAVED_VALUES', 'high_mana_potion') and gui.all_bools['high_mana_potion'].get():
+            heal(config.get('SAVED_HOTKEYS', 'high_mana_potion'), gui)
+            print("mp < SAVED_VALUE", mp, gui.config['SAVED_VALUES']['high_mana_potion'])
     time.sleep(0.1)
 
 

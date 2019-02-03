@@ -26,30 +26,39 @@ gui: this is everything, alright
 result:
 looping through all .png files in "assets/cds/", doing an imagesearch and updating its location in .ini file.
 '''
-
 def find_cds(gui):
-    directory_in_str = "assets/cds/"
-    directory = os.fsencode(directory_in_str)
-    for file in os.listdir(directory):
-        filename = os.fsdecode(file)
-        if filename.endswith(".png"):
-            spell = filename.replace(".png", "")
-            if gui.config.has_option('ATTACK_COOLDOWNS', spell):
-                coords = imgS.imagesearch(directory_in_str + filename)
-                if coords[0] is not -1:
-                    gui.config.set('ATTACK_COOLDOWNS', spell, str(coords))
-            elif gui.config.has_option('HEALING_COOLDOWNS', spell):
-                    coords = imgS.imagesearch(directory_in_str + filename)
-                    if coords[0] is not -1:
-                        gui.config.set('HEALING_COOLDOWNS', spell, str(coords))
-            elif gui.config.has_option('SUPPORT_COOLDOWNS', spell):
-                coords = imgS.imagesearch(directory_in_str + filename)
-                if coords[0] is not -1:
-                    gui.config.set('SUPPORT_COOLDOWNS', spell, str(coords))
-            else:
-                print("There is a .png file in assets/cds that isnt in config.ini. (rework inc)")
-        else:
-            continue
+    for item in gui.config.items('SPELL_NAME'):
+        directory_in_str = "assets/cds/"
+        directory = os.fsencode(directory_in_str)
+        for file in os.listdir(directory):
+            filename = os.fsdecode(file)
+            if filename.endswith(".png"):
+                spell = filename.replace(".png", "")
+                if item[1].replace(" ", "_") == spell:
+                    print(item[0])
+                    if gui.config.has_option('ATTACK_COOLDOWNS', item[0]):
+                        coords = imgS.imagesearch(directory_in_str + filename)
+                        print(coords)
+                        if coords[0] is not -1:
+                            gui.config.set('ATTACK_COOLDOWNS', item[0], str(coords))
+                    elif gui.config.has_option('HEALING_COOLDOWNS', item[0]):
+                        coords = imgS.imagesearch(directory_in_str + filename)
+                        if coords[0] is not -1:
+                            gui.config.set('HEALING_COOLDOWNS', item[0], str(coords))
+                    elif gui.config.has_option('SUPPORT_COOLDOWNS', item[0]):
+                        coords = imgS.imagesearch(directory_in_str + filename)
+                        if coords[0] is not -1:
+                            gui.config.set('SUPPORT_COOLDOWNS', item[0], str(coords))
+    gui.update_config()
+
+
+def get_monster_list(gui):
+    targets = gui.config.get('MONSTERS', 'list').split(', ')
+    targets = map(lambda target:target.replace(" ", "_"), targets)
+    targets = map(lambda target: 'assets/monsters/'+target+'.png', targets)
+    return list(targets)
+
+
 
 
 # Code to check if left or right mouse buttons were pressed

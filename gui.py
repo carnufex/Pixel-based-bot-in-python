@@ -11,7 +11,7 @@ class GUI:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Carnufex@Github")
-        self.root.geometry('400x500')
+        self.root.geometry('600x500')
         self.root.resizable(width=False, height=False)
 
         self.config_file_path = self.set_file_path()
@@ -50,6 +50,11 @@ class GUI:
         else: # normal Python environment
             bundle_dir = os.path.dirname(os.path.abspath(__file__))
         return bundle_dir + '\\config.ini'
+
+    def update_config(self):
+            with open(self.config_file_path, 'w') as configfile:
+                self.config.write(configfile)
+
 
     '''
     finds all titles of visible windows, filters for "Tibia -" and returns full string.
@@ -155,8 +160,7 @@ class GUI:
         result = que.get()
         mouse_thread.join()
         self.config.set(section, item[0], str(result))
-        with open(self.config_file_path, 'w') as configfile:
-            self.config.write(configfile)
+        self.update_config()
         self.update_text(text_field, result)
 
     def update_anchors(self, item, text_field, section):
@@ -168,14 +172,12 @@ class GUI:
             self.config.set(section, item[0], str(start_coords_dict[item[0][:2]]))
             self.update_text(text_field, str(start_coords_dict[item[0][:2]]))
 
-        with open(self.config_file_path, 'w') as configfile:
-            self.config.write(configfile)
+        self.update_config()
 
     def update_textField(self, stringVar, section, item):
         self.config.set(section, item, stringVar.get())
         # self.hotkey_checkButton_dict['healing'].invoke()
-        with open(self.config_file_path, 'w') as configfile:
-            self.config.write(configfile)
+        self.update_config()
         stringVar.set(self.config[section][item])
         # self.hotkey_checkButton_dict['healing'].invoke()
         return True
@@ -185,14 +187,13 @@ class GUI:
         new_val = amountObj.get()
         #print('gui: {0}  category: {1}   item: {2}  new val: {3}'.format(GUI_obj, category, item, new_val))
         self.config.set(category, item, new_val)
-        with open(self.config_file_path, 'w') as configfile:
-            self.config.write(configfile)
+        self.update_config()
 
 
 
 
     def create_notebook(self, root, names):
-        nb = ttk.Notebook(root, width=390, height=450)
+        nb = ttk.Notebook(root, width=590, height=450)
         nb.pack()
 
         # Create tabs & save them by name in a dictionary
@@ -241,9 +242,9 @@ class GUI:
             parent.focus_set()
             return text_field
 
-        def add_text_command(parent, stringVar, width, height, row, col, command, section, item):
+        def add_text_command(parent, stringVar, width, height, row, col, command, section, item, columnspan=1):
             e = tk.Entry(parent, textvariable=stringVar, validate="focusout", validatecommand=lambda: command(stringVar, section, item), width=width)
-            e.grid(row=row, column=col, sticky=tk.N, pady=10, padx=10)
+            e.grid(row=row, column=col, sticky=tk.N, pady=10, padx=10, columnspan=columnspan)
             return e
 
 
@@ -314,6 +315,7 @@ class GUI:
             hotkey = tk.StringVar()
             amount = tk.StringVar()
             priority = tk.StringVar()
+            range = tk.StringVar()
             for save in self.config.items('SAVED_HOTKEYS'):
                 if name == save[0]:
                     hotkey.set(save[1])
@@ -332,25 +334,31 @@ class GUI:
                     break
                 else:
                     priority.set('None')
-            return (hotkey, amount, priority)
+            for save in self.config.items('RANGE'):
+                if name == save[0]:
+                    priority.set(save[1])
+                    break
+                else:
+                    priority.set('None')
+            return (hotkey, amount, priority, range)
 
         def load_hotkeys(parent):
             add_label(parent, 'Enable all hotkeys: ', 0, 0)
             add_button_thread(parent, "Hotkeys", self.button_thread, 0, 1, columnspan=3)
-            hotkey, trash, trash = load_spell_settings('spell_rotation')
+            hotkey = load_spell_settings('spell_rotation')[0]
             #spell rotation
             add_optionMenu(parent, hotkey, self.hotkeys, self.update_hotkeys, 'SAVED_HOTKEYS', 'spell_rotation', 1, 0)
             bool = tk.BooleanVar()
             self.checkButton_hk_bools['spell_rotation'] = bool
             add_checkButton_hk(parent, 'spell_rotation', self.checkButton_hk_bools['spell_rotation'], self.button_thread, 1, 1)
             #healing
-            hotkey, trash, trash = load_spell_settings('healing')
+            hotkey = load_spell_settings('healing')[0]
             add_optionMenu(parent, hotkey, self.hotkeys, self.update_hotkeys, 'SAVED_HOTKEYS', 'healing', 2, 0)
             bool = tk.BooleanVar()
             self.checkButton_hk_bools['healing'] = bool
             add_checkButton_hk(parent, 'healing', self.checkButton_hk_bools['healing'], self.button_thread, 2, 1)
             # heal friend
-            hotkey, trash, trash = load_spell_settings('heal_friend')
+            hotkey = load_spell_settings('heal_friend')[0]
             add_optionMenu(parent, hotkey, self.hotkeys, self.update_hotkeys, 'SAVED_HOTKEYS', 'heal_friend', 3, 0)
             bool = tk.BooleanVar()
             self.checkButton_hk_bools['heal_friend'] = bool
@@ -364,11 +372,12 @@ class GUI:
 
         def load_spell_rotation(parent):
             i = 1
-            add_label(parent, 'Hotkey', i, 0)
-            add_label(parent, 'Active', i, 1)
-            add_label(parent, 'Min monsters', i, 2)
-            add_label(parent, 'Priority', i, 3)
-            add_label(parent, 'Range', i, 4)
+            add_label(parent, 'Spell', i, 0)
+            add_label(parent, 'Hotkey', i, 1)
+            add_label(parent, 'Active', i, 2)
+            add_label(parent, 'Min monsters', i, 3)
+            add_label(parent, 'Priority', i, 4)
+            add_label(parent, 'Range', i, 5)
 
             #iterating through every offensive attack
             for item in self.config.items('ATTACK_COOLDOWNS'):
@@ -377,12 +386,22 @@ class GUI:
                 bool = tk.BooleanVar()
                 self.all_bools[item[0]] = bool
                 # mapping saved hotkeys to hotkeys
-                tk_hotkey, tk_amount, tk_priority = load_spell_settings(item[0])
+                tk_hotkey, tk_amount, tk_priority, tk_range = load_spell_settings(item[0])
                 #adding buttons
-                add_optionMenu(parent, tk_hotkey, self.hotkeys, self.update_hotkeys, 'SAVED_HOTKEYS', item[0], i, 0)
-                add_checkButton_spell(parent, item[0], 'attack' ,self.all_bools[item[0]], i, 1)
-                add_optionMenu(parent, tk_amount, [str(i) for i in range(10)], self.update_hotkeys, 'AMOUNT', item[0], i, 2)
-                add_optionMenu(parent, tk_priority, [str(i) for i in range(10)], self.update_hotkeys, 'PRIORITY', item[0], i, 3)
+                text = tk.StringVar()
+                text.set(self.config.get('SPELL_NAME', item[0]))
+                add_text_command(parent, text, 12, 1, i, 0, self.update_textField, 'SPELL_NAME', item[0])
+                add_optionMenu(parent, tk_hotkey, self.hotkeys, self.update_hotkeys, 'SAVED_HOTKEYS', item[0], i, 1)
+                # item[0] is the key for tuple
+                add_checkButton_spell(parent, item[0], 'attack' ,self.all_bools[item[0]], i, 2)
+                add_optionMenu(parent, tk_amount, [str(i) for i in range(10)], self.update_hotkeys, 'AMOUNT', item[0], i, 3)
+                add_optionMenu(parent, tk_priority, [str(i) for i in range(10)], self.update_hotkeys, 'PRIORITY', item[0], i, 4)
+                add_optionMenu(parent, tk_range, [str(i) for i in range(10)], self.update_hotkeys, 'RANGE', item[0], i, 5)
+            i += 1
+            add_label(parent, 'Monsters: ', i, 0)
+            text = tk.StringVar()
+            text.set(self.config.get('MONSTERS', 'list'))
+            add_text_command(parent, text, 60, 1, i, 1, self.update_textField, 'MONSTERS', 'list', 5)
 
 
         def load_healing(parent):
@@ -462,9 +481,12 @@ def hk_run():
 
 #def spellrotation_run(radius, rune, min_monsters, hotkey, start_coords, end_coords, config):
 def spellrotation_run(start_coords, end_coords, gui):
+    utilities.find_cds(gui)
+    targets = utilities.get_monster_list(gui)
+    print(targets)
     pressed = gui.checkButton_hk_bools['spell_rotation'].get()
     while pressed:
-        sr.spellrotation(start_coords, end_coords, gui)
+        sr.spellrotation(start_coords, end_coords, gui, targets)
         pressed = gui.checkButton_hk_bools['spell_rotation'].get()
 
 

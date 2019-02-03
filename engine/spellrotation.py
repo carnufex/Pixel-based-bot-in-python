@@ -8,11 +8,6 @@ from PIL import Image
 import math
 from lib import utilities, sendInput
 
-#targets = ["assets/monsters/hp_bar.png"]
-targets = ["assets/monsters/troll.png", "assets/monsters/war_wolf.png", "assets/monsters/orc_rider.png", "assets/monsters/orc_spearman.png", \
-          "assets/monsters/orc_warrior.png", "assets/monsters/orc_berserker.png"]
-# targets = ["assets/monsters/swampling.png", "assets/monsters/emerald_damselfly.png"]
-
 '''
 
 Searchs for an image within an area
@@ -122,12 +117,10 @@ def proximity(list, range, x1, y1, x2, y2):
     return results
 
 
-
-
 '''
 
 '''
-def spellrotation(start_coords, end_coords, gui):
+def spellrotation(start_coords, end_coords, gui, targets):
     start = time.time()
     config = gui.config
     active_spells = []
@@ -149,36 +142,40 @@ def spellrotation(start_coords, end_coords, gui):
         amount = int(config['AMOUNT'][spell[1]])
         hotkey = config['SAVED_HOTKEYS'][spell[1]]
         if coords_list[0] is not -1: #no monster on screen
-            exoris = ['exori', 'exori_gran', 'exori_gran_ico']
-            strikes = ['exori_frigo', 'exori_vis', 'exori_flam', 'exori_mort', 'exori_tera', 'noob_strike']
             x1, y1 = utilities.string2tuple(gui.config.get('GAMEWINDOW', 'game_start_coords'))
             x2, y2 = utilities.string2tuple(gui.config.get('GAMEWINDOW', 'game_end_coords'))
             game_width = x2 - x1
-            if spell[1] in exoris:
-                radius = (game_width *0.25)
-                prox = proximity(coords_list, radius, x1, y1, x2, y2)
-                if len(prox) >= amount:
-                    cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS'][spell[1]])
-                    cooldown = utilities.has_cd(spell[1], cooldown_coords[0], cooldown_coords[1])
-                    if not cooldown:
-                        sendInput.send_key(hotkey, title=gui.title)
-            elif spell[1] == 'aoe_rune':
+            if spell[1] == 'aoe_rune':
                 cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS'][spell[1]])
-                cooldown = utilities.has_cd(spell[1], cooldown_coords[0], cooldown_coords[1])
+                spell_name = config.get('SPELL_NAME', spell[1]).replace(" ", "_")
+                cooldown = utilities.has_cd(spell_name, cooldown_coords[0], cooldown_coords[1])
                 if not cooldown:
-                    radius = (game_width * 0.40)
+                    radius = (game_width * 0.35)
                     best = aim_gfb(coords_list, radius)
                     if best[1] >= amount:
-                        print("FIRING AOE RUNE")
                         fire(hotkey, best[0], gui)
                         end = time.time()
                         print("Spell rotation time: ", end-start)
+                        break
 
-            elif spell[1] in strikes:
-                radius = (game_width * 0.4)
-                prox = proximity(coords_list, radius, x1, y1, x2, y2)
-                if len(prox) >= amount:
-                    cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS'][spell[1]])
-                    cooldown = utilities.has_cd(spell[1], cooldown_coords[0], cooldown_coords[1])
-                    if not cooldown:
+            elif spell[1] == 'spell_1':
+                cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS'][spell[1]])
+                spell_name = config.get('SPELL_NAME', spell[1]).replace(" ", "_")
+                cooldown = utilities.has_cd(spell_name, cooldown_coords[0], cooldown_coords[1])
+                if not cooldown:
+                    radius = game_width * (0.15 * int(config.get('RANGE', spell[1])))
+                    prox = proximity(coords_list, radius, x1, y1, x2, y2)
+                    if len(prox) >= amount:
                         sendInput.send_key(hotkey, title=gui.title)
+                        break
+
+            elif spell[1] == 'spell_2':
+                cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS'][spell[1]])
+                spell_name = config.get('SPELL_NAME', spell[1]).replace(" ", "_")
+                cooldown = utilities.has_cd(spell_name, cooldown_coords[0], cooldown_coords[1])
+                if not cooldown:
+                    radius = game_width * (0.15 * int(config.get('RANGE', spell[1])))
+                    prox = proximity(coords_list, radius, x1, y1, x2, y2)
+                    if len(prox) >= amount:
+                        sendInput.send_key(hotkey, title=gui.title)
+                        break
