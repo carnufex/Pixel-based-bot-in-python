@@ -4,6 +4,7 @@ import win32api, win32con, win32gui
 from ctypes import windll
 import time
 import numpy as np
+from PIL import Image
 import cv2 as cv
 import os
 
@@ -58,6 +59,10 @@ def get_monster_list(gui):
     targets = map(lambda target: 'assets/monsters/'+target+'.png', targets)
     return list(targets)
 
+def get_friend_list(gui):
+    names = gui.config.get('HEAL_FRIEND', 'names').split(', ')
+    friends = map(lambda friend:friend.replace(" ", "_"), names)
+    return list(friends)
 
 
 
@@ -186,10 +191,23 @@ def find_pixel_color(color, end_bar_color, deviation, x1, y1, x2, y2, image=None
     no_match = (-1, -1)
     return no_match
 
+def dev_find_color(x1, y1, x2, y2):
+    image = imgS.region_grabber((x1, y1, x2, y1+1))
+    im = np.array(image)
+    image.save('find_color_area.png')
+    rows = im.shape[0]
+    cols = im.shape[1]
+    for i in range(rows):
+        for j in range(cols):
+            pixel = im[i, j]
+            print(pixel)
+            pyautogui.moveTo(j+x1, i+y1)
+
 def find_countours(im):
     # Convert image to gray and blur it
     src_gray = cv.cvtColor(im, cv.COLOR_BGR2GRAY)
     src_gray = cv.blur(src_gray, (3,3))
+
     # Create Window
     # source_window = 'Source'
     # cv.namedWindow(source_window)
@@ -209,7 +227,7 @@ def find_countours(im):
     # Save 1px thick line
     something, drawing_w, drawing_h = drawing.shape[::-1]
     middle_height = int(drawing_h/2)
-    crop_drawing = drawing[middle_height:middle_height+1, 0:drawing_w]
+    crop_drawing = drawing[middle_height-1:middle_height+1, 0:drawing_w]
     # cv.imwrite('tmp/contours.png', crop_drawing)
     # cv.waitKey() #awsome debugging tool
     return crop_drawing

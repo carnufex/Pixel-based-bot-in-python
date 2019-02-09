@@ -24,7 +24,9 @@ hotkey_dict = { 'f1': win32con.VK_F1,
                 'f9': win32con.VK_F9,
                 'f10': win32con.VK_F10,
                 'f11': win32con.VK_F11,
-                'f12': win32con.VK_F12
+                'f12': win32con.VK_F12,
+                'shift': win32con.VK_SHIFT,
+                'ctrl': win32con.VK_CONTROL
                 }
 
 def send_keyboard_input(pycwnd, hotkey=None, msg=None):

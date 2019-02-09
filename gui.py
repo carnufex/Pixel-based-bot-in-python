@@ -11,7 +11,7 @@ class GUI:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Carnufex@Github")
-        self.root.geometry('600x500')
+        self.root.geometry('700x500')
         self.root.resizable(width=False, height=False)
 
         self.config_file_path = self.set_file_path()
@@ -193,7 +193,7 @@ class GUI:
 
 
     def create_notebook(self, root, names):
-        nb = ttk.Notebook(root, width=590, height=450)
+        nb = ttk.Notebook(root, width=690, height=450)
         nb.pack()
 
         # Create tabs & save them by name in a dictionary
@@ -431,10 +431,26 @@ class GUI:
                     else:
                         text.set(0)
                         tf = 0
+
                 add_optionMenu(parent, tk_hotkey, self.hotkeys, self.update_hotkeys, 'SAVED_HOTKEYS', item[0], i, 0)
                 add_text_command(parent, text, 4, 1, i, 1, self.update_textField, 'SAVED_VALUES', item[0])
                 #add_text(parent, tf, 12, 1, i, 1)
                 add_checkButton_spell(parent, item[0], 'heal', self.all_bools[item[0]], i, 2)
+            i += 1
+            for item in self.config.items('SUPPORT_COOLDOWNS'):
+                i += 1
+                bool = tk.BooleanVar()
+                self.all_bools[item[0]] = bool
+                tk_hotkey = tk.StringVar()
+                for save in self.config.items('SAVED_HOTKEYS'):
+                    if item[0] == save[0]:
+                        tk_hotkey.set(save[1])
+                        break
+                    else:
+                        tk_hotkey.set('None')
+                add_optionMenu(parent, tk_hotkey, self.hotkeys, self.update_hotkeys, 'SAVED_HOTKEYS', item[0], i, 0)
+                add_checkButton_spell(parent, item[0], 'heal', self.all_bools[item[0]], i, 2)
+
 
 
 
@@ -492,6 +508,7 @@ def spellrotation_run(start_coords, end_coords, gui):
 
 def healing_run():
     healing.find_anchors()
+    utilities.find_battlelist()
     for item in gui.config.items('HP_AND_MANA_BAR'):
         if item[1] == '[]':
             print("GO CONFIG AND UPDATE YOUR HP/MANA SETTINGS")
