@@ -7,6 +7,7 @@ import numpy as np
 from PIL import Image
 import cv2 as cv
 import os
+from lib import sendInput
 
 
 def has_cd(img, x, y, im=None):
@@ -175,7 +176,7 @@ def find_pixel_color(color, end_bar_color, deviation, x1, y1, x2, y2, image=None
     #template = cv2.imread(image, 0)
     # print("called with:", color, end_bar_color, deviation, x1, y1, x2, y2)
     if image is None:
-        image = imgS.region_grabber((x1, y1, x2, y1+1))
+        image = imgS.region_grabber((x1, y1, x2, y2))
     im = np.array(image)
     #image.save('hp.png')
     rows = im.shape[0]
@@ -192,7 +193,7 @@ def find_pixel_color(color, end_bar_color, deviation, x1, y1, x2, y2, image=None
     return no_match
 
 def dev_find_color(x1, y1, x2, y2):
-    image = imgS.region_grabber((x1, y1, x2, y1+1))
+    image = imgS.region_grabber((x1, y1, x2, y2))
     im = np.array(image)
     image.save('find_color_area.png')
     rows = im.shape[0]
@@ -231,3 +232,10 @@ def find_countours(im):
     # cv.imwrite('tmp/contours.png', crop_drawing)
     # cv.waitKey() #awsome debugging tool
     return crop_drawing
+
+
+
+def setFocusWindow(gui):
+    '''sets focus'''
+    whndl = sendInput.get_whndl(gui.title)
+    win32gui.SetForegroundWindow(whndl)

@@ -1,9 +1,24 @@
-import win32api, win32con, win32gui, win32ui, win32service, os, time
+import os
+import random
+import time
 
-def send_click_input(pycwnd, x ,y):
+import win32con
+
+import win32api
+import win32gui
+import win32service
+import win32ui
+
+
+def send_click_input(pycwnd, x ,y, button='left'):
     lParam = int(y) <<16 | int(x)
-    pycwnd.SendMessage(win32con.WM_LBUTTONDOWN, win32con.MK_LBUTTON, lParam);
-    pycwnd.SendMessage(win32con.WM_LBUTTONUP, 0, lParam);
+    if button == 'left':
+        pycwnd.SendMessage(win32con.WM_LBUTTONDOWN, win32con.MK_LBUTTON, lParam);
+        pycwnd.SendMessage(win32con.WM_LBUTTONUP, 0, lParam);
+    else:
+        print("right click", x, y)
+        pycwnd.SendMessage(win32con.WM_RBUTTONDOWN, win32con.MK_RBUTTON, lParam);
+        pycwnd.SendMessage(win32con.WM_RBUTTONUP, 0, lParam);
 
 def get_whndl(title):
     whndl = win32gui.FindWindowEx(0, 0, None, title)
@@ -26,7 +41,10 @@ hotkey_dict = { 'f1': win32con.VK_F1,
                 'f11': win32con.VK_F11,
                 'f12': win32con.VK_F12,
                 'shift': win32con.VK_SHIFT,
-                'ctrl': win32con.VK_CONTROL
+                'ctrl': win32con.VK_CONTROL,
+                'space': win32con.VK_SPACE,
+                '3': 0x33,
+                '4': 0x34
                 }
 
 def send_keyboard_input(pycwnd, hotkey=None, msg=None):
@@ -65,17 +83,15 @@ def send_keyboard_input(pycwnd, hotkey=None, msg=None):
 # send_click_input(pycwnd, 1170, 550)
 
 
-
-
 def send_key(hotkey, msg=None, title=None):
     whndl = get_whndl(title)
     pycwnd = make_pycwnd(whndl)
     send_keyboard_input(pycwnd, hotkey, msg)
 
-def send_click(x, y, title):
+def send_click(x, y, title, button='left'):
     whndl = get_whndl(title)
     pycwnd = make_pycwnd(whndl)
-    send_click_input(pycwnd, x, y)
+    send_click_input(pycwnd, x, y, button)
 
 # https://docs.microsoft.com/sv-se/windows/desktop/inputdev/virtual-key-codes
 #send_input('Tibia -', 'f11')

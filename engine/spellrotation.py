@@ -146,6 +146,7 @@ def spellrotation(start_coords, end_coords, gui, targets):
             x2, y2 = utilities.string2tuple(gui.config.get('GAMEWINDOW', 'game_end_coords'))
             game_width = x2 - x1
             if spell[1] == 'aoe_rune':
+                start2 = time.time()
                 cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS'][spell[1]])
                 spell_name = config.get('SPELL_NAME', spell[1]).replace(" ", "_")
                 cooldown = utilities.has_cd(spell_name, cooldown_coords[0], cooldown_coords[1])
@@ -155,7 +156,7 @@ def spellrotation(start_coords, end_coords, gui, targets):
                     if best[1] >= amount:
                         fire(hotkey, best[0], gui)
                         end = time.time()
-                        print("Spell rotation time: ", end-start)
+                        print("Spell rotation time: ", end-start, end-start2)
                         break
 
             elif spell[1] == 'spell_1':

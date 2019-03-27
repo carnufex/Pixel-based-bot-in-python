@@ -12,7 +12,8 @@ def foreach_window(hwnd, lParam):
         length = GetWindowTextLength(hwnd)
         buff = ctypes.create_unicode_buffer(length + 1)
         GetWindowText(hwnd, buff, length + 1)
-        if buff.value.find('Tibia - ') == -1:
+        #if buff.value.find('Tibia - ') == -1:
+        if buff.value.find('Tibia') == -1:
             pass
         else:
             titles.append(buff.value)
