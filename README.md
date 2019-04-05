@@ -1,6 +1,6 @@
 # UNDER DEVELOPMENT
 
-#video showcase
+# video showcase
 [![Watch the video](https://img.youtube.com/vi/QO6LDanJHpI/maxresdefault.jpg)](https://www.youtube.com/watch?v=QO6LDanJHpI)
 
 
@@ -12,12 +12,11 @@
 
 
 # dependencies
-# prerequisite for ocr stuff
+# prerequisite for archlight_me stuff
 * Visual C++ Redistributable XXXX
 * Python 3.71 - https://www.python.org/downloads/release/python-371/ (make sure do add python to PATH)
--this is not used in current version, don't mind this-
-** Install tesseract - https://github.com/UB-Mannheim/tesseract/wiki  (add to path as well, C:\Program Files (x86)\Tesseract-OCR)
-** replace file eng.traineddata with the one from git repository in "C:\Program Files (x86)\Tesseract-OCR\tessdata"
+* Install tesseract - https://github.com/UB-Mannheim/tesseract/wiki  (add to path as well, C:\Program Files (x86)\Tesseract-OCR)
+* replace file eng.traineddata with the one from git repository in "C:\Program Files (x86)\Tesseract-OCR\tessdata"
 
 
 # Libraries
