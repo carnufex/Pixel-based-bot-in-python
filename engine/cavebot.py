@@ -18,15 +18,7 @@ WAYPOINTS = [
     },
     {
         "mark": "questionmark",
-        "type": "rope"
-    },
-    {
-        "mark": "cross",
-        "type": "shovel"
-    },
-    {
-        "mark": "checkmark",
-        "type": "rope"
+        "type": "stand"
     },
     {
         "mark": "exclimationmark",
@@ -34,30 +26,6 @@ WAYPOINTS = [
     },
     {
         "mark": "star",
-        "type": "shovel"
-    },
-    {
-        "mark": "exclimationmark",
-        "type": "rope"
-    },
-    {
-        "mark": "checkmark",
-        "type": "stand"
-    },
-    {
-        "mark": "cross",
-        "type": "shovel"
-    },
-    {
-        "mark": "cross",
-        "type": "stand"
-    },
-    {
-        "mark": "questionmark",
-        "type": "rope"
-    },
-    {
-        "mark": "checkmark",
         "type": "stand"
     },
     {
@@ -65,13 +33,13 @@ WAYPOINTS = [
         "type": "stand"
     },
     {
-        "mark": "questionmark",
+        "mark": "church",
         "type": "stand"
     },
     {
-        "mark": "star",
-        "type": "shovel"
-    },
+        "mark": "mouth",
+        "type": "stand"
+    }
 ]
 def init_minimap():
     '''finds map'''
@@ -103,9 +71,8 @@ def go_wpt(wpt_img, minimap_pos, battlelist_coords, gui):
         else:
             if wpt_img["type"] != "stand":
                 action_wpt(wpt_img, gui, minimap_pos, battlelist_coords)
-        return
     else:
-        print("wpt not found")
+        print("wpt not found: ", wpt_img)
     
 def click_wpt(wpt_img, pos, minimap_pos, title):
     '''click wpt'''
@@ -122,6 +89,8 @@ def click_wpt(wpt_img, pos, minimap_pos, title):
 def action_wpt(wpt, gui, minimap_pos, battlelist_coords):
     '''do action waypoint'''
     pos = utilities.string2tuple(gui.config.get('GAMEWINDOW', 'character_pos'))
+    chase_off(gui.title)
+    time.sleep(0.5)
     if wpt["type"] == 'rope':
         print("roping")
         sendInput.send_key('3', '3', title=gui.title)
@@ -130,15 +99,25 @@ def action_wpt(wpt, gui, minimap_pos, battlelist_coords):
         check = wpt_reached({"mark": "lock"}, minimap_pos)
         if not check:
             go_wpt(wpt, minimap_pos, battlelist_coords, gui)
+        else:
+            chase_on(gui.title)
     elif wpt["type"] == 'shovel':
         print('shoveling')
+        start = utilities.string2tuple(gui.config.get('GAMEWINDOW', 'game_start_coords'))
+        end = utilities.string2tuple(gui.config.get('GAMEWINDOW', 'game_end_coords'))
+        offset_x = (end[0]-start[0])/15
+        offset_y = (end[1]-start[1])/11
         sendInput.send_key('4', '4', title=gui.title)
         time.sleep(0.5)
-        sendInput.send_click(pos[0], pos[1], title=gui.title)
+        sendInput.send_click(pos[0], pos[1]-offset_y, title=gui.title)
+        time.sleep(0.5)
+        sendInput.send_click(pos[0], pos[1]-offset_y, title=gui.title)
+        time.sleep(0.5)
         check = wpt_reached({"mark": "lock"}, minimap_pos)
         if not check:
             go_wpt(wpt, minimap_pos, battlelist_coords, gui)
-        #use rope hk on self pos
+        else:
+            chase_on(gui.title)
 
 
 
@@ -150,12 +129,34 @@ def wpt_reached(wpt_img, minimap_pos):
     wpt = imgS.imagesearcharea("assets/map/"+wpt_img["mark"]+".png", middle_start[0], middle_start[1], middle_end[0], middle_end[1], 0.7)
     if wpt[0] is not -1:
         return True
+    print("havent reached wpt: ", wpt_img)
     return False
 
 
+def chase_off(title):
+    '''turns chasing off'''
+    image = "assets/stop_chase.png"
+    x, y = pyautogui.size()
+    x_start = x/10 * 9
+    follow_mode = imgS.imagesearcharea(image, x_start, 0, x, y)
+    print("off: ", follow_mode)
+    if follow_mode[0] is not -1:
+        sendInput.send_click(follow_mode[0]+x_start, follow_mode[1]-13, title)
+        print("chase is off")
+        time.sleep(0.5)
+    
 
-
-
+def chase_on(title):
+    '''turns chasing on'''
+    image = "assets/chase_target.png"
+    x, y = pyautogui.size()
+    x_start = x/10 * 9
+    follow_mode = imgS.imagesearcharea(image, x_start, 0, x, y)
+    print("on: ", follow_mode)
+    if follow_mode[0] is not -1:
+        print("chase is on")
+        sendInput.send_click(follow_mode[0]+x_start, follow_mode[1]-13, title)
+        time.sleep(0.5)
 
 # def ss_wpt():
 #     x,y = pyautogui.position()

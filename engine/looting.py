@@ -19,11 +19,11 @@ def loot(gui):
 # click every sqm around the character?
 def click_loot(left_x, top_y, sqm_width, sqm_height, title):
     '''clicks in a 3x3 grid around the char'''
+    print("looting...")
     for x in range(3):
         loot_x = left_x + x*sqm_width
         for y in range(3):
             loot_y = top_y + y*sqm_height
-            print("looting: ", x, y)
             # pyautogui.moveTo(loot_x, loot_y)
             sendInput.send_click(loot_x, loot_y, title, 'right')
             time.sleep(0.1)
