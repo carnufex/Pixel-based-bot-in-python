@@ -42,4 +42,5 @@ win32gui.ReleaseDC(hwnd, hwndDC)
 
 if result == 1:
     #PrintWindow Succeeded
+    im = im.crop((500, 500, 1000, 1000))
     im.save("test.png")

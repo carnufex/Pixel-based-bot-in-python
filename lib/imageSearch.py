@@ -29,7 +29,6 @@ output : a PIL image of the area selected.
 
 def region_grabber(region):
     start = time.time()
-    print("running")
     hwnd = win32gui.FindWindow(None, 'Windowed Projector (Preview)')
 
     # Change the line below depending on whether you want the whole window
@@ -72,8 +71,10 @@ def region_grabber(region):
         #PrintWindow Succeeded
         # im.save("test.png")
         end = time.time()
-        print("TIME: ", end-start)
-        return im
+        # print("TIME: ", end-start)
+        return im.crop((region[0], region[1], region[2], region[3]))
+    else:
+        print("Something went shit in region_grabber()")
 
 '''
 

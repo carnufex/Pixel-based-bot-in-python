@@ -11,14 +11,22 @@ from engine import healFriend
 random.seed()
 NEXT_TIME = time.time()
 
-COLOR_DICT = {'hp': [219, 79, 79],
-              'hp_empty': [77, 90, 116],
-              'hp_end_bar': [47, 51, 62],
-              'hp_full': [100, 46, 49],
-              'mp': [101, 98, 240],
-              'mp_empty': [89, 95, 106],
-              'mp_end_bar': [51, 52, 56],
-              'mp_full': [83, 80, 192]}
+COLOR_DICT = {
+    'hp': [94, 56, 63],
+    'hp_empty': [38, 62, 118],
+    'hp_end_bar': [36, 55, 96],
+    'hp_full': [70, 71, 71],
+    # 'hp': [219, 79, 79],
+    # 'hp_empty': [77, 90, 116],
+    # 'hp_end_bar': [47, 51, 62],
+    # 'hp_full': [100, 46, 49],
+    # 'mp': [101, 98, 240], these used offset +5 in find_ func and was not for obs
+    # 'mp_empty': [89, 95, 106],
+    # 'mp_full': [83, 80, 192]}
+    'mp': [64, 63, 125],
+    'mp_empty': [36, 73, 154],
+    'mp_end_bar': [69, 69, 70],
+    'mp_full': [69, 69, 70]} 
 
 
 START_COORDS_DICT = defaultdict(list)
@@ -41,7 +49,7 @@ def pixels2percent(start, end, current):
 
 def find_hp():
     '''finds the location (pixels) of the health bar'''
-    image = 'assets/life.png'
+    image = 'assets/life_obs.png'
     img = cv2.imread(image, 0)
     img_w, img_h = img.shape[::-1]
     x_end, y_end = pyautogui.size()
@@ -50,7 +58,9 @@ def find_hp():
     screen_shot.save('test.jpg')
     coords_relative = imgS.imagesearcharea(image, x_start, 0, x_end, y_end, im=screen_shot)
     if coords_relative[0] is not -1:
-        coords = [coords_relative[0]+x_start+img_w, coords_relative[1]+5] #add back offset
+        coords = [coords_relative[0]+x_start+img_w, coords_relative[1]+0] #add back offset
+        # utilities.dev_find_color(coords[0], coords[1], x_end-100, coords[1]+1)
+        # input("Press Enter to continue...")
         hp_start = utilities.find_pixel_color(COLOR_DICT['hp'], COLOR_DICT['hp_full'], 0,\
             coords[0], coords[1], x_end, y_end)
         if hp_start[0] is not -1:
@@ -62,7 +72,7 @@ def find_hp():
 
 def find_status_bar():
     '''finds the status bar below equipment'''
-    image = 'assets/statusbar/left_corner.png'
+    image = 'assets/statusbar/left_corner_obs.png'
     img = cv2.imread(image, 0)
     img_w, img_h = img.shape[::-1]
     x2, y2 = pyautogui.size()
@@ -76,7 +86,7 @@ def find_status_bar():
 
 def find_mp():
     '''finds the location (pixels) of the mana bar'''
-    image = 'assets/mana.png'
+    image = 'assets/mana_obs.png'
     img = cv2.imread(image, 0)
     img_w, img_h = img.shape[::-1]
     x2, y2 = pyautogui.size()
@@ -84,7 +94,9 @@ def find_mp():
     im = imgS.region_grabber((x1, 0, x2, y2))
     coords_relative = imgS.imagesearcharea(image, x1, 0, x2, y2, im=im)
     if coords_relative[0] is not -1:
-        coords = [coords_relative[0]+x1+img_w, coords_relative[1]+5]  #add back offset
+        coords = [coords_relative[0]+x1+img_w, coords_relative[1]+1]  #add back offset
+        # utilities.dev_find_color(coords[0], coords[1], x2-100, coords[1]+1)
+        # input("Press Enter to continue...")
         mp_start = utilities.find_pixel_color(COLOR_DICT['mp'], COLOR_DICT['mp_full'], 0, coords[0], coords[1], x2, coords[1]+1)
         if mp_start[0] is not -1:
             append_dict(START_COORDS_DICT, 'mp', mp_start)
@@ -104,6 +116,8 @@ def get_curr(empty_key, deviation):
         current_px = utilities.find_pixel_color(color, COLOR_DICT[empty_key[0:2]+'_full'], deviation, start[0], start[1], end[0], start[1]+1) #change end[1] to start[1]+1?
         if current_px[0] is not -1:
             current_pc = pixels2percent(start[0], end[0], current_px[0])
+            if current_pc == None:
+                current_pc = 0
             return int(current_pc)
         return None
     else:
@@ -142,6 +156,7 @@ def find_anchors():
     find_hp()
     find_mp()
     find_status_bar()
+    print("ANCHORS", START_COORDS_DICT, END_COORDS_DICT)
     return START_COORDS_DICT, END_COORDS_DICT
 
 def run(gui):

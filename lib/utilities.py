@@ -135,14 +135,14 @@ def key2hex(key):
     return hex_int
 
 def find_battlelist():
-    battlelist_start = imgS.imagesearch('assets/battlelist/battlelist.png')
+    battlelist_start = imgS.imagesearch('assets/battlelist/battlelist_obs.png')
     if battlelist_start[0] is not -1:
         x2, y2 = pyautogui.size()
-        battlelist_end = imgS.imagesearcharea('assets/battlelist/minimize_close.png', battlelist_start[0], battlelist_start[1], x2, y2)
+        battlelist_end = imgS.imagesearcharea('assets/battlelist/minimize_close_obs.png', battlelist_start[0], battlelist_start[1], x2, y2)
         if battlelist_end[0] is not -1:
-            battlelist_end = (battlelist_end[0] + battlelist_start[0], y2) #relative to absolute
-            print("BATTLE START: ", battlelist_start)
-            print("BATTLE END: ", battlelist_end)
+            battlelist_end = (battlelist_end[0] + battlelist_start[0]+5, y2) #relative to absolute and +5 offset 
+            # print("BATTLE START: ", battlelist_start)
+            # print("BATTLE END: ", battlelist_end)
             return [battlelist_start, battlelist_end]
     print("BATTLE NOT FOUND")
     return [-1, -1]
