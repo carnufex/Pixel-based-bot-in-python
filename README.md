@@ -24,3 +24,6 @@ pip install opencv-python pyautogui pytesseract pillow
 
 # Other
 AHK script included to keep window of choice on top with (ctrl + space)
+
+#compile
+https://pypi.org/project/auto-py-to-exe/

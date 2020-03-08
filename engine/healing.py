@@ -47,6 +47,7 @@ def find_hp():
     x_end, y_end = pyautogui.size()
     x_start = (x_end/5) * 4
     screen_shot = imgS.region_grabber((x_start, 0, x_end, y_end))
+    screen_shot.save('test.jpg')
     coords_relative = imgS.imagesearcharea(image, x_start, 0, x_end, y_end, im=screen_shot)
     if coords_relative[0] is not -1:
         coords = [coords_relative[0]+x_start+img_w, coords_relative[1]+5] #add back offset

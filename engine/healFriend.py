@@ -14,6 +14,7 @@ battlelist_coords = utilities.find_battlelist()
 #2 find friend to heal from battlelist
 def find_player_name(img_path, coords): #coords is array with tuples [(x_start, y_start), (x_end, y_end)]
     if os.path.isfile(img_path):
+        # print("COORDS:", coords);
         # print(img_path, coords[0][0], coords[0][1], coords[1][0], coords[1][1])
         x, y = imgS.imagesearcharea(img_path, coords[0][0], coords[0][1], coords[1][0], coords[1][1])
         if x is not -1:
@@ -26,6 +27,7 @@ def find_player_name(img_path, coords): #coords is array with tuples [(x_start, 
 
 #3 find friends hp
 def find_player_hp(img_path):
+    # print("battle coords", battlelist_coords)
     coords = find_player_name(img_path, battlelist_coords)
     if coords is not None:
         if coords[0][0] is not -1:

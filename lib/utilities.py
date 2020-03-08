@@ -141,7 +141,10 @@ def find_battlelist():
         battlelist_end = imgS.imagesearcharea('assets/battlelist/minimize_close.png', battlelist_start[0], battlelist_start[1], x2, y2)
         if battlelist_end[0] is not -1:
             battlelist_end = (battlelist_end[0] + battlelist_start[0], y2) #relative to absolute
+            print("BATTLE START: ", battlelist_start)
+            print("BATTLE END: ", battlelist_end)
             return [battlelist_start, battlelist_end]
+    print("BATTLE NOT FOUND")
     return [-1, -1]
 
 def RGB_deviations(color, end_bar_color, pixel, deviation):
@@ -217,7 +220,7 @@ def find_countours(im):
     # Detect edges using Canny
     canny_output = cv.Canny(src_gray, threshold, threshold * 2)
     # Find contours
-    _, contours, hierarchy = cv.findContours(canny_output, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv.findContours(canny_output, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     # Draw contours
     drawing = np.zeros((canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8)
     for i in range(len(contours)):

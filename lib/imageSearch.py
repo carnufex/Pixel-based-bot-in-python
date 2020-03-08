@@ -3,7 +3,10 @@ import numpy as np
 import pyautogui
 import random
 import time
-
+import win32gui
+import win32ui
+from ctypes import windll
+from PIL import Image
 
 '''
 
@@ -15,14 +18,62 @@ input : a tuple containing the 4 coordinates of the region to capture
 output : a PIL image of the area selected.
 
 '''
+# def region_grabber(region):
+#     x1 = region[0]
+#     y1 = region[1]
+#     width = region[2]-x1
+#     height = region[3]-y1
+
+#     return pyautogui.screenshot(region=(x1,y1,width,height))
+
+
 def region_grabber(region):
-    x1 = region[0]
-    y1 = region[1]
-    width = region[2]-x1
-    height = region[3]-y1
+    start = time.time()
+    print("running")
+    hwnd = win32gui.FindWindow(None, 'Windowed Projector (Preview)')
 
-    return pyautogui.screenshot(region=(x1,y1,width,height))
+    # Change the line below depending on whether you want the whole window
+    # or just the client area. 
+    #left, top, right, bot = win32gui.GetClientRect(hwnd)
+    left, top, right, bot = win32gui.GetWindowRect(hwnd)
+    # left, top, right, bot = region[0], region[1], region[2], region[3]
+    w = int(right - left)
+    h = int(bot - top)
 
+    hwndDC = win32gui.GetWindowDC(hwnd)
+    mfcDC  = win32ui.CreateDCFromHandle(hwndDC)
+    saveDC = mfcDC.CreateCompatibleDC()
+
+    saveBitMap = win32ui.CreateBitmap()
+    saveBitMap.CreateCompatibleBitmap(mfcDC, w, h)
+
+    saveDC.SelectObject(saveBitMap)
+
+    # Change the line below depending on whether you want the whole window
+    # or just the client area. 
+    #result = windll.user32.PrintWindow(hwnd, saveDC.GetSafeHdc(), 1)
+    result = windll.user32.PrintWindow(hwnd, saveDC.GetSafeHdc(), 0)
+    # print(result)
+
+    bmpinfo = saveBitMap.GetInfo()
+    bmpstr = saveBitMap.GetBitmapBits(True)
+
+    im = Image.frombuffer(
+        'RGB',
+        (bmpinfo['bmWidth'], bmpinfo['bmHeight']),
+        bmpstr, 'raw', 'BGRX', 0, 1)
+
+    win32gui.DeleteObject(saveBitMap.GetHandle())
+    saveDC.DeleteDC()
+    mfcDC.DeleteDC()
+    win32gui.ReleaseDC(hwnd, hwndDC)
+
+    if result == 1:
+        #PrintWindow Succeeded
+        # im.save("test.png")
+        end = time.time()
+        print("TIME: ", end-start)
+        return im
 
 '''
 
@@ -97,7 +148,8 @@ the top left corner coordinates of the element if found as an array [x,y] or [-1
 
 '''
 def imagesearch(image, precision=0.8):
-    im = pyautogui.screenshot()
+    # im = pyautogui.screenshot()
+    im = region_grabber([0,0,2550, 1440])
     #im.save('testarea.png') # usefull for debugging purposes, this will save the captured region as "testarea.png"
     img_rgb = np.array(im)
     img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
