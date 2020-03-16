@@ -11,13 +11,16 @@ import win32ui
 
 
 def send_click_input(pycwnd, x ,y, button='left'):
-    lParam = int(y) <<16 | int(x)
+    # lParam = int(y) <<16 | int(x)
+    lParam = win32api.MAKELONG(x, y)
     if button == 'left':
         pycwnd.SendMessage(win32con.WM_LBUTTONDOWN, win32con.MK_LBUTTON, lParam);
         pycwnd.SendMessage(win32con.WM_LBUTTONUP, 0, lParam);
     else:
         print("right click", x, y)
-        pycwnd.SendMessage(win32con.WM_RBUTTONDOWN, win32con.MK_RBUTTON, lParam);
+        pycwnd.SendMessage(win32con.WM_ACTIVATEAPP, win32con.WM_ACTIVATEAPP, 0)
+        pycwnd.SendMessage(win32con.WM_MOUSEMOVE, 0, lParam)
+        pycwnd.SendMessage(win32con.WM_RBUTTONDOWN, win32con.MK_CONTROL, lParam);
         pycwnd.SendMessage(win32con.WM_RBUTTONUP, 0, lParam);
 
 def get_whndl(title):

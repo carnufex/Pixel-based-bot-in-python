@@ -34,7 +34,7 @@ def find_player_hp(img_path):
             img = cv.imread(img_path, 0)
             img_w, img_h = img.shape[::-1]
             hp_bar_size = 10 #px
-            hp_bar_im = imgS.region_grabber((coords[0][0], coords[0][1]+img_h, coords[1][0]+5, coords[0][1]+img_h+hp_bar_size))  # putting offset on x2 cuz im having troubles with scenarios with full hp
+            hp_bar_im = imgS.region_grabber((coords[0][0], coords[0][1]+img_h, coords[1][0], coords[0][1]+img_h+hp_bar_size))  # putting offset on x2 cuz im having troubles with scenarios with full hp
             img_rgb = np.array(hp_bar_im)
             return utilities.find_countours(img_rgb)
     return coords

@@ -18,17 +18,21 @@ def check_mana():
 
 def use_cask(gui):
     location = utilities.string2tuple(gui.config.get('MANA_TRAIN', 'cask'))
+    utilities.setFocusWindow(gui)
     pyautogui.click(x=location[0], y=location[1], button='right')
-    #sendInput.send_click(location[0], location[1], title=gui.title)
+    # sendInput.send_click(location[0], location[1], button="right", title=gui.title)
 
 def get_mana(gui):
     mppc = check_mana()
     hk = gui.config.get('MANA_TRAIN', 'mana_hotkey')
     value = int(gui.config.get('MANA_TRAIN', 'pot_mppc'))
+    count = 0
     while mppc < value:
+        count += 1
         use(hk, gui)
         mppc = check_mana()
-    use_cask(gui)
+        if count > 20: #probably no more manas, use casks
+            use_cask(gui)
 
 def make_rune(gui):
     mppc = check_mana()
