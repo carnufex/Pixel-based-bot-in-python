@@ -22,7 +22,7 @@ def run(gui):
 
 
 def region_grabber():
-    #start = time.time()
+    start = time.time()
     hwnd = win32gui.FindWindow(None, 'Windowed Projector (Preview)')
 
     left, top, right, bot = win32gui.GetWindowRect(hwnd)
@@ -59,7 +59,7 @@ def region_grabber():
     if result == 1:
         #PrintWindow Succeeded
         #im.save("test.png")
-        #end = time.time()
+        end = time.time()
         #print("TIME: ", end - start)
         return im
     else:

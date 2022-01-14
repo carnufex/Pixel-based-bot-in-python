@@ -27,10 +27,8 @@ returns :
 the top left corner coordinates of the element if found as an array [x,y] or [-1,-1] if not
 
 '''
-def imagesearcharea(image, x1,y1,x2,y2, im, precision=0.8) :
-    print(im)    
+def imagesearcharea(image, x1,y1,x2,y2, im, precision=0.8) :   
     im = im.crop((x1, y1, x2, y2))
-    print(im)
 
     img_rgb = np.array(im)
     img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)

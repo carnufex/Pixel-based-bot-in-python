@@ -182,12 +182,10 @@ atm O(n)
 
 what the ... have I done here? Why not run the method twice instead of inputting 2 different colors? brain fart confirmed.
 '''
-def find_pixel_color(color, end_bar_color, deviation, x1, y1, x2, y2, image=None):
+def find_pixel_color(color, end_bar_color, deviation, x1, y1, x2, y2, image):
     #template = cv2.imread(image, 0)
     # print("called with:", color, end_bar_color, deviation, x1, y1, x2, y2)
-    if image is None:
-        image = imgS.region_grabber((x1, y1, x2, y2))
-    im = np.array(image)
+    im = np.array(image.crop((x1, y1, x2, y2)))
     #image.save('hp.png')
     rows = im.shape[0]
     cols = im.shape[1]

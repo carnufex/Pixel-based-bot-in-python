@@ -55,23 +55,19 @@ def find_hp(gui):
     img_w, img_h = img.shape[::-1]
     x_end, y_end = pyautogui.size()
     x_start = (x_end / 5) * 4
-    screen_shot = gui.currentImage.crop((x_start, 0, x_end, y_end))
-    screen_shot.save('test.jpg')
+    screen_shot = gui.currentImage
+    #screen_shot.save('test.jpg')
     coords_relative = imgS.imagesearcharea(image, x_start, 0, x_end, y_end, screen_shot)
     if coords_relative[0] is not -1:
         coords = [coords_relative[0] + x_start + img_w, coords_relative[1] + 0] #add back offset
-        # utilities.dev_find_color(coords[0], coords[1], x_end-100,
-                                                                                       # coords[1]+1)
-                                                                                                                                                                      # input("Press
-                                                                                                                                                                                                                                                     # Enter
-                                                                                                                                                                                                                                                                                                                                    # to
-                                                                                                                                                                                                                                                                                                                                                                                                                   # continue...")
+        #utilities.dev_find_color(coords[0], coords[1], x_end-100, coords[1]+1)
+                                                                                       #input("Press")
         hp_start = utilities.find_pixel_color(COLOR_DICT['hp'], COLOR_DICT['hp_full'], 0,\
-            coords[0], coords[1], x_end, y_end)
+            coords[0], coords[1], x_end, y_end, gui.currentImage)
         if hp_start[0] is not -1:
             append_dict(START_COORDS_DICT, 'hp', hp_start)
             hp_end = utilities.find_pixel_color(COLOR_DICT['hp_end_bar'], COLOR_DICT['hp_full'], 0,\
-                hp_start[0], hp_start[1], x_end, y_end)
+                hp_start[0], hp_start[1], x_end, y_end, gui.currentImage)
             if hp_end[0] is not -1:
                 append_dict(END_COORDS_DICT, 'hp', hp_end)
 
@@ -96,8 +92,7 @@ def find_mp(gui):
     img_w, img_h = img.shape[::-1]
     x2, y2 = pyautogui.size()
     x1 = (x2 / 5) * 4
-    im = gui.currentImage.crop((x1, 0, x2, y2))
-    coords_relative = imgS.imagesearcharea(image, x1, 0, x2, y2, im)
+    coords_relative = imgS.imagesearcharea(image, x1, 0, x2, y2, gui.currentImage)
     if coords_relative[0] is not -1:
         coords = [coords_relative[0] + x1 + img_w, coords_relative[1] + 1]  #add back offset
         # utilities.dev_find_color(coords[0], coords[1], x2-100, coords[1]+1)
@@ -105,23 +100,26 @@ def find_mp(gui):
                                                                                                                                                             # Enter
                                                                                                                                                                                                                                       # to
                                                                                                                                                                                                                                                                                                                 # continue...")
-        mp_start = utilities.find_pixel_color(COLOR_DICT['mp'], COLOR_DICT['mp_full'], 0, coords[0], coords[1], x2, coords[1] + 1)
+        mp_start = utilities.find_pixel_color(COLOR_DICT['mp'], COLOR_DICT['mp_full'], 0, coords[0], coords[1], x2, coords[1] + 1, gui.currentImage)
         if mp_start[0] is not -1:
             append_dict(START_COORDS_DICT, 'mp', mp_start)
-            mp_end = utilities.find_pixel_color(COLOR_DICT['mp_end_bar'], COLOR_DICT['mp_full'], 0, mp_start[0], mp_start[1], x2, mp_start[1] + 1)
+            mp_end = utilities.find_pixel_color(COLOR_DICT['mp_end_bar'], COLOR_DICT['mp_full'], 0, mp_start[0], mp_start[1], x2, mp_start[1] + 1, gui.currentImage)
             if mp_end[0] is not -1:
                 append_dict(END_COORDS_DICT, 'mp', mp_end)
 
 
 
-def get_curr(empty_key, deviation):
+def get_curr(empty_key, deviation, im):
     '''finds the current hp and returns it as %'''
+    startT = time.time()
     start = START_COORDS_DICT[empty_key[0:2]]
     end = END_COORDS_DICT[empty_key[0:2]]
     color = COLOR_DICT[empty_key]
-    print("start: {0} end: {1} color: {2}".format(start, end, color))
+    #print("start: {0} end: {1} color: {2}".format(start, end, color))
     if start != [] and end != []:
-        current_px = utilities.find_pixel_color(color, COLOR_DICT[empty_key[0:2] + '_full'], deviation, start[0], start[1], end[0], start[1] + 1) #change end[1] to start[1]+1?
+        startT = time.time()
+        current_px = utilities.find_pixel_color(color, COLOR_DICT[empty_key[0:2] + '_full'], deviation, start[0], start[1], end[0], start[1] + 1, im) #change end[1] to start[1]+1?
+        print(time.time() - startT)
         if current_px[0] is not -1:
             current_pc = pixels2percent(start[0], end[0], current_px[0])
             if current_pc == None:
@@ -142,7 +140,7 @@ def check_para(gui):
     para_color = [109, 27, 27]
     deviation = 10
     if STATUS_BAR_DICT['start'] != [] and STATUS_BAR_DICT['end'] != []:
-        paralyzed = utilities.find_pixel_color(para_color, para_color, deviation, start[0], start[1], end[0], end[1])
+        paralyzed = utilities.find_pixel_color(para_color, para_color, deviation, start[0], start[1], end[0], end[1], gui.currentImage)
         if paralyzed[0] is not -1:
             heal(config.get('SAVED_HOTKEYS', 'anti_paralyze'), gui)
     else:
@@ -179,8 +177,8 @@ def heal(hotkey, gui):
 
 def heal_engine(gui):
     '''healing conditions'''
-    hp = get_curr('hp_empty', 10)
-    mp = get_curr('mp_empty', 10)
+    hp = get_curr('hp_empty', 10, gui.currentImage)
+    mp = get_curr('mp_empty', 10, gui.currentImage)
     config = gui.config
     if hp is None:
         hp = 100

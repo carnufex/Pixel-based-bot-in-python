@@ -10,8 +10,8 @@ def use(hotkey, gui):
     sendInput.send_key(hotkey, title=gui.title)
     time.sleep(random.uniform(1.0, 2.0))
 
-def check_mana():
-    mp = healing.get_curr('mp_empty', 10)
+def check_mana(gui):
+    mp = healing.get_curr('mp_empty', 10, gui)
     if mp is None:
         mp = 100
     return mp
@@ -20,10 +20,10 @@ def use_cask(gui):
     location = utilities.string2tuple(gui.config.get('MANA_TRAIN', 'cask'))
     utilities.setFocusWindow(gui)
     pyautogui.click(x=location[0], y=location[1], button='right')
-    # sendInput.send_click(location[0], location[1], button="right", title=gui.title)
-
+    # sendInput.send_click(location[0], location[1], button="right",
+    # title=gui.title)
 def get_mana(gui):
-    mppc = check_mana()
+    mppc = check_mana(gui)
     hk = gui.config.get('MANA_TRAIN', 'mana_hotkey')
     value = int(gui.config.get('MANA_TRAIN', 'pot_mppc'))
     count = 0
@@ -50,7 +50,7 @@ def mana_train(gui):
         make_rune(gui)
     end = time.time()
     # 15 seconds per soul point - the time consumed to create the runes
-    return time.time() + (amount * soul_cost * 14) - (end-start)
+    return time.time() + (amount * soul_cost * 14) - (end - start)
 
 def waste_mana(gui):
     '''mana train'''
