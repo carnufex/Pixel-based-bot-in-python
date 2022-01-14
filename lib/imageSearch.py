@@ -94,7 +94,7 @@ returns :
 the top left corner coordinates of the element if found as an array [x,y] or [-1,-1] if not
 
 '''
-def imagesearcharea(image, x1,y1,x2,y2, precision=0.8, im=None) :
+def imagesearcharea(image, x1,y1,x2,y2, precision=0.8, im=None ) :
     if im is None :
         im = region_grabber(region=(x1, y1, x2, y2))
         # im.save('testarea.png') #usefull for debugging purposes, this will save the captured region as "testarea.png"

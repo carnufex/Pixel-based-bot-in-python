@@ -3,6 +3,7 @@ import os
 import queue
 import sys
 import threading
+from threading import Lock
 import time
 import tkinter as tk
 from tkinter import ttk
@@ -15,6 +16,7 @@ from engine import cavebot, healing, manaTrain
 from engine import spellrotation as sr
 from engine import targeting
 from lib import hk, utilities, windowTitles
+from lib import imageSearch
 
 
 class GUI:
@@ -23,6 +25,7 @@ class GUI:
         self.root.title("Carnufex@Github")
         self.root.geometry('700x500')
         self.root.resizable(width=False, height=False)
+        self.lock = Lock()
 
         self.config_file_path = self.set_file_path()
         self.config = configparser.ConfigParser()
@@ -202,16 +205,17 @@ class GUI:
     '''
 
     def update_click(self, item, text_field, section):
-        print("updating: ", item, text_field)
         que = queue.Queue()
         mouse_thread = threading.Thread(target=lambda q, arg1: q.put(
             utilities.detect_mouse_click(arg1)), args=(que, 'test'))
         mouse_thread.start()
         result = que.get()
+        results = "(" + str(result.x) + "," + str(result.y) + ")"
         mouse_thread.join()
-        self.config.set(section, item[0], str(result))
+        print("updating: ", item, text_field, results)
+        self.config.set(section, item[0], results)
         self.update_config()
-        self.update_text(text_field, result)
+        self.update_text(text_field, results)
 
     def update_anchors(self, item, text_field, section):
         start_coords_dict, end_coords_dict = healing.find_anchors()
@@ -636,13 +640,13 @@ class GUI:
 
 
 def hk_run():
+    utilities.find_cds(gui)
     hk.start(gui)
 
 # def spellrotation_run(radius, rune, min_monsters, hotkey, start_coords, end_coords, config):
 
 
 def spellrotation_run(start_coords, end_coords, gui):
-    utilities.find_cds(gui)
     targets = utilities.get_monster_list(gui)
     print(targets)
     pressed = gui.checkButton_hk_bools['spell_rotation'].get()

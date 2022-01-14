@@ -2,12 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="259099a8-4787-4967-81ef-ad46405856b2" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config.ini" beforeDir="false" afterPath="$PROJECT_DIR$/config.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/healFriend.py" beforeDir="false" afterPath="$PROJECT_DIR$/engine/healFriend.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/healing.py" beforeDir="false" afterPath="$PROJECT_DIR$/engine/healing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/utilities.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utilities.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/test.jpg" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -52,6 +48,7 @@
       <workItem from="1550526116437" duration="4000" />
       <workItem from="1554368542942" duration="107000" />
       <workItem from="1582981994060" duration="28000" />
+      <workItem from="1586170020278" duration="16000" />
     </task>
     <servers />
   </component>
@@ -63,7 +60,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
