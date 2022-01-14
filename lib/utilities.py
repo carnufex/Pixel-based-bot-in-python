@@ -12,9 +12,9 @@ import os
 from lib import sendInput
 
 
-def has_cd(img, x, y, im=None):
+def has_cd(img, x, y, im):
     img = 'assets/cds/{}.png'.format(img)
-    no_cd = imgS.imagesearcharea(img, x, y, x + 50, y + 50, 0.7, im)
+    no_cd = imgS.imagesearcharea(img, x, y, x + 50, y + 50, im, 0.7)
     if no_cd[0] is not -1:
         #it has no cd, return false
         return False

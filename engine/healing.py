@@ -55,9 +55,7 @@ def find_hp(gui):
     img_w, img_h = img.shape[::-1]
     x_end, y_end = pyautogui.size()
     x_start = (x_end / 5) * 4
-    screen_shot = gui.currentImage
-    #screen_shot.save('test.jpg')
-    coords_relative = imgS.imagesearcharea(image, x_start, 0, x_end, y_end, screen_shot)
+    coords_relative = imgS.imagesearcharea(image, x_start, 0, x_end, y_end, gui.currentImage)
     if coords_relative[0] is not -1:
         coords = [coords_relative[0] + x_start + img_w, coords_relative[1] + 0] #add back offset
         #utilities.dev_find_color(coords[0], coords[1], x_end-100, coords[1]+1)
@@ -117,9 +115,9 @@ def get_curr(empty_key, deviation, im):
     color = COLOR_DICT[empty_key]
     #print("start: {0} end: {1} color: {2}".format(start, end, color))
     if start != [] and end != []:
-        startT = time.time()
         current_px = utilities.find_pixel_color(color, COLOR_DICT[empty_key[0:2] + '_full'], deviation, start[0], start[1], end[0], start[1] + 1, im) #change end[1] to start[1]+1?
-        print(time.time() - startT)
+        #print(time.time() - startT)
+                                                                                                                                                             #print(current_px)
         if current_px[0] is not -1:
             current_pc = pixels2percent(start[0], end[0], current_px[0])
             if current_pc == None:

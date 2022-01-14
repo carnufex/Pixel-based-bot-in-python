@@ -31,7 +31,8 @@ an array of top left corner coordinates or [-1,-1] if not anything was found.
 def imagesearcharea_array(array, x1,y1,x2,y2, precision=0.8, im=None) :
     if im is None :
         im = region_grabber(region=(x1, y1, x2, y2))
-        # im.save('testarea.png') #usefull for debugging purposes, this will save the captured region as "testarea.png"
+        # im.save('testarea.png') #usefull for debugging purposes, this will
+        # save the captured region as "testarea.png"
 
     matches = []
     img_rgb = np.array(im)
@@ -76,7 +77,7 @@ def aim_gfb(list, radius):
     for coord in list:
         x_p = coord[0]
         y_p = coord[1]
-        d = math.sqrt((x_p - x_c)**2 + (y_p - y_c)**2)
+        d = math.sqrt((x_p - x_c) ** 2 + (y_p - y_c) ** 2)
         tmp.append((d, coord))
     i = 0
     for distance in tmp:
@@ -105,13 +106,13 @@ def fire(hotkey, coords, gui):
 
 
 def proximity(lista, range, x1, y1, x2, y2):
-    x_center = ((x2-x1)/2)+x1
-    y_center = ((y2-y1)/2)+y1
+    x_center = ((x2 - x1) / 2) + x1
+    y_center = ((y2 - y1) / 2) + y1
     results = []
     for coord in lista:
         x_point = coord[0]
         y_point = coord[1]
-        distance = math.sqrt((x_point - x_center)**2 + (y_point - y_center)**2)
+        distance = math.sqrt((x_point - x_center) ** 2 + (y_point - y_center) ** 2)
         if distance <= range:
             results.append(coord)
     return results
@@ -120,22 +121,19 @@ def proximity(lista, range, x1, y1, x2, y2):
 '''
 
 '''
-cooldown1 = time.time()
-cooldown2 = time.time()
-cooldown3 = time.time()
 def spellrotation(start_coords, end_coords, gui, targets):
-    global cooldown1
-    global cooldown2
-    global cooldown3
     start = time.time()
     config = gui.config
     active_spells = []
 
 
-    # im = imgS.region_grabber(region=(start_coords[0], start_coords[1], end_coords[0], end_coords[1]))
-    # coords_list = imagesearcharea_array(targets, start_coords[0], start_coords[1], end_coords[0], end_coords[1], 0.7, im=im)
+    # im = imgS.region_grabber(region=(start_coords[0], start_coords[1],
+    # end_coords[0], end_coords[1]))
+    # coords_list = imagesearcharea_array(targets, start_coords[0],
+    # start_coords[1], end_coords[0], end_coords[1], 0.7, im=im)
     coords_list = [(1, 1)]
-    #look for all active spells and add them to active spell list along with priority
+    #look for all active spells and add them to active spell list along with
+    #priority
     for item in gui.all_spells_dict['attack']:
         item_tuple = (config['PRIORITY'][item], item)
         if gui.all_bools[item].get() is True:
@@ -158,23 +156,23 @@ def spellrotation(start_coords, end_coords, gui, targets):
                 start2 = time.time()
                 cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS'][spell[1]])
                 spell_name = config.get('SPELL_NAME', spell[1]).replace(" ", "_")
-                cooldown = utilities.has_cd(spell_name, cooldown_coords[0], cooldown_coords[1])
+                cooldown = utilities.has_cd(spell_name, cooldown_coords[0], cooldown_coords[1], gui.currentImage)
                 if not cooldown:
                     radius = (game_width * 0.35)
                     best = aim_gfb(coords_list, radius)
                     if best[1] >= amount:
                         fire(hotkey, best[0], gui)
                         end = time.time()
-                        print("Spell rotation time: ", end-start, end-start2)
+                        print("Spell rotation time: ", end - start, end - start2)
                         break
 
             elif spell[1] == 'spell_1':
                 cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS'][spell[1]])
                 spell_name = config.get('SPELL_NAME', spell[1]).replace(" ", "_")
-                # cooldown = utilities.has_cd(spell_name, cooldown_coords[0], cooldown_coords[1])
-                # if not cooldown:
-                if time.time() > cooldown1:
-                    # radius = game_width * (0.15 * int(config.get('RANGE', spell[1])))
+                cooldown = utilities.has_cd(spell_name, cooldown_coords[0], cooldown_coords[1], gui.currentImage)
+                if not cooldown:
+                    # radius = game_width * (0.15 * int(config.get('RANGE',
+                    # spell[1])))
                     # prox = proximity(coords_list, radius, x1, y1, x2, y2)
                     # if len(prox) >= amount:
                     sendInput.send_key(hotkey, title=gui.title)
@@ -184,10 +182,10 @@ def spellrotation(start_coords, end_coords, gui, targets):
             elif spell[1] == 'spell_2':
                 cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS'][spell[1]])
                 spell_name = config.get('SPELL_NAME', spell[1]).replace(" ", "_")
-                # cooldown = utilities.has_cd(spell_name, cooldown_coords[0], cooldown_coords[1])
-                # if not cooldown:
-                if time.time() > cooldown2:
-                    # radius = game_width * (0.15 * int(config.get('RANGE', spell[1])))
+                cooldown = utilities.has_cd(spell_name, cooldown_coords[0], cooldown_coords[1], gui.currentImage)
+                if not cooldown:
+                    # radius = game_width * (0.15 * int(config.get('RANGE',
+                    # spell[1])))
                     # prox = proximity(coords_list, radius, x1, y1, x2, y2)
                     # if len(prox) >= amount:
                     sendInput.send_key(hotkey, title=gui.title)
@@ -197,10 +195,10 @@ def spellrotation(start_coords, end_coords, gui, targets):
             elif spell[1] == 'spell_3':
                 cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS'][spell[1]])
                 spell_name = config.get('SPELL_NAME', spell[1]).replace(" ", "_")
-                # cooldown = utilities.has_cd(spell_name, cooldown_coords[0], cooldown_coords[1])
-                # if not cooldown:
-                if time.time() > cooldown3:
-                    # radius = game_width * (0.15 * int(config.get('RANGE', spell[1])))
+                cooldown = utilities.has_cd(spell_name, cooldown_coords[0], cooldown_coords[1], gui.currentImage)
+                if not cooldown:
+                    # radius = game_width * (0.15 * int(config.get('RANGE',
+                    # spell[1])))
                     # prox = proximity(coords_list, radius, x1, y1, x2, y2)
                     # if len(prox) >= amount:
                     sendInput.send_key(hotkey, title=gui.title)
