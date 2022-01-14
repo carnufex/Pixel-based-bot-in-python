@@ -3,7 +3,6 @@ import os
 import queue
 import sys
 import threading
-from threading import Lock
 import time
 import tkinter as tk
 from tkinter import ttk
@@ -15,8 +14,7 @@ import win32gui
 from engine import cavebot, healing, manaTrain
 from engine import spellrotation as sr
 from engine import targeting
-from lib import hk, utilities, windowTitles
-from lib import imageSearch
+from lib import hk, utilities, windowTitles, screenShotter
 
 
 class GUI:
@@ -25,7 +23,7 @@ class GUI:
         self.root.title("Carnufex@Github")
         self.root.geometry('700x500')
         self.root.resizable(width=False, height=False)
-        self.lock = Lock()
+        self.currentImage = None
 
         self.config_file_path = self.set_file_path()
         self.config = configparser.ConfigParser()
@@ -101,14 +99,14 @@ class GUI:
             spellrotation_thread = None
             if self.checkButton_hk_bools['spell_rotation'].get() is True:
                 # button pressed
-                # coords is loaded from file as strings, parsing back to tuple type.
-                start_coords = utilities.string2tuple(
-                    self.config['GAMEWINDOW']['game_start_coords'])
-                end_coords = utilities.string2tuple(
-                    self.config['GAMEWINDOW']['game_end_coords'])
-                #spellrotation_thread = threading.Thread(target=spellrotation_run, args=(300, 'avalanche', 2, hotkey, start_coords, end_coords, config))
-                spellrotation_thread = threading.Thread(
-                    target=spellrotation_run, args=(start_coords, end_coords, gui))
+                # coords is loaded from file as strings, parsing back to tuple
+                # type.
+                start_coords = utilities.string2tuple(self.config['GAMEWINDOW']['game_start_coords'])
+                end_coords = utilities.string2tuple(self.config['GAMEWINDOW']['game_end_coords'])
+                #spellrotation_thread =
+                #threading.Thread(target=spellrotation_run, args=(300,
+                #'avalanche', 2, hotkey, start_coords, end_coords, config))
+                spellrotation_thread = threading.Thread(target=spellrotation_run, args=(start_coords, end_coords, gui))
                 try:
                     print("starting spell rotation")
                     spellrotation_thread.start()
@@ -206,8 +204,7 @@ class GUI:
 
     def update_click(self, item, text_field, section):
         que = queue.Queue()
-        mouse_thread = threading.Thread(target=lambda q, arg1: q.put(
-            utilities.detect_mouse_click(arg1)), args=(que, 'test'))
+        mouse_thread = threading.Thread(target=lambda q, arg1: q.put(utilities.detect_mouse_click(arg1)), args=(que, 'test'))
         mouse_thread.start()
         result = que.get()
         results = "(" + str(result.x) + "," + str(result.y) + ")"
@@ -220,12 +217,10 @@ class GUI:
     def update_anchors(self, item, text_field, section):
         start_coords_dict, end_coords_dict = healing.find_anchors()
         if item[0][7:] == 'end':
-            self.config.set(section, item[0], str(
-                end_coords_dict[item[0][:2]]))
+            self.config.set(section, item[0], str(end_coords_dict[item[0][:2]]))
             self.update_text(text_field, str(end_coords_dict[item[0][:2]]))
         else:
-            self.config.set(section, item[0], str(
-                start_coords_dict[item[0][:2]]))
+            self.config.set(section, item[0], str(start_coords_dict[item[0][:2]]))
             self.update_text(text_field, str(start_coords_dict[item[0][:2]]))
 
         self.update_config()
@@ -240,7 +235,8 @@ class GUI:
 
     def update_hotkeys(self, category, item, amountObj=None):
         new_val = amountObj.get()
-        #print('gui: {0}  category: {1}   item: {2}  new val: {3}'.format(GUI_obj, category, item, new_val))
+        #print('gui: {0} category: {1} item: {2} new val: {3}'.format(GUI_obj,
+        #category, item, new_val))
         self.config.set(category, item, new_val)
         self.update_config()
 
@@ -261,15 +257,13 @@ class GUI:
             return label
 
         def add_button_thread(parent, button_text, command, row, column, columnspan=1):
-            button = tk.Button(parent, text=button_text, command=lambda: command(
-                button), bg="red", relief="raised", width=14)
+            button = tk.Button(parent, text=button_text, command=lambda: command(button), bg="red", relief="raised", width=14)
             button.grid(row=row, column=column, sticky=tk.N,
                         pady=10, padx=10, columnspan=columnspan)
             return button
 
         def add_button_config(parent, button_text, command, item, text_field, section, row, column):
-            button = tk.Button(parent, text=button_text, command=lambda: command(
-                item, text_field, section), bg="grey", width=10)
+            button = tk.Button(parent, text=button_text, command=lambda: command(item, text_field, section), bg="grey", width=10)
             button.grid(row=row, column=column, sticky=tk.N, pady=10, padx=10)
             return button
 
@@ -278,16 +272,14 @@ class GUI:
                 variable = self.checkButton_hk_bools[text]
             except:
                 print("Didn\'t find the bool connected to checkbox")
-            check_button = tk.Checkbutton(parent, text=text.replace(
-                "_", " "), variable=variable, command=lambda: command(check_button), onvalue=True, offvalue=False)
+            check_button = tk.Checkbutton(parent, text=text.replace("_", " "), variable=variable, command=lambda: command(check_button), onvalue=True, offvalue=False)
             check_button.grid(row=row, column=column,
                               sticky=tk.N, pady=10, padx=10)
             self.hotkey_checkButton_dict[text] = check_button
             return check_button
 
         def add_checkButton_spell(parent, spell, school, variable, row, column):
-            check_button = tk.Checkbutton(parent, text=spell.replace(
-                "_", " "), variable=variable, onvalue=True, offvalue=False)
+            check_button = tk.Checkbutton(parent, text=spell.replace("_", " "), variable=variable, onvalue=True, offvalue=False)
             check_button.grid(row=row, column=column,
                               sticky=tk.N, pady=10, padx=10)
             spell_dict = self.all_spells_dict[school]
@@ -369,11 +361,10 @@ class GUI:
                 add_button_config(parent, 'update', self.update_anchors,
                                   item, text_field, 'HP_AND_MANA_BAR', i, 2)
                 i += 1
-            #add_button_config(parent, 'update', self.update_anchors, item, text_field, 'HP_AND_MANA_BAR', i-2, 2)
-            cooldown_button = tk.Button(
-                parent, text="Cooldowns", command=cooldown_window)
-            cooldown_button.grid(
-                row=i, column=1, sticky=tk.N, pady=10, padx=10)
+            #add_button_config(parent, 'update', self.update_anchors, item,
+            #text_field, 'HP_AND_MANA_BAR', i-2, 2)
+            cooldown_button = tk.Button(parent, text="Cooldowns", command=cooldown_window)
+            cooldown_button.grid(row=i, column=1, sticky=tk.N, pady=10, padx=10)
 
         def load_spell_settings(name):
             hotkey = tk.StringVar()
@@ -416,24 +407,21 @@ class GUI:
                            'SAVED_HOTKEYS', 'spell_rotation', 1, 0)
             bool = tk.BooleanVar()
             self.checkButton_hk_bools['spell_rotation'] = bool
-            add_checkButton_hk(
-                parent, 'spell_rotation', self.checkButton_hk_bools['spell_rotation'], self.button_thread, 1, 1)
+            add_checkButton_hk(parent, 'spell_rotation', self.checkButton_hk_bools['spell_rotation'], self.button_thread, 1, 1)
             # healing
             hotkey = load_spell_settings('healing')[0]
             add_optionMenu(parent, hotkey, self.hotkeys,
                            self.update_hotkeys, 'SAVED_HOTKEYS', 'healing', 2, 0)
             bool = tk.BooleanVar()
             self.checkButton_hk_bools['healing'] = bool
-            add_checkButton_hk(
-                parent, 'healing', self.checkButton_hk_bools['healing'], self.button_thread, 2, 1)
+            add_checkButton_hk(parent, 'healing', self.checkButton_hk_bools['healing'], self.button_thread, 2, 1)
             # heal friend
             hotkey = load_spell_settings('heal_friend')[0]
             add_optionMenu(parent, hotkey, self.hotkeys,
                            self.update_hotkeys, 'SAVED_HOTKEYS', 'heal_friend', 3, 0)
             bool = tk.BooleanVar()
             self.checkButton_hk_bools['heal_friend'] = bool
-            add_checkButton_hk(
-                parent, 'heal_friend', self.checkButton_hk_bools['heal_friend'], self.button_thread, 3, 1)
+            add_checkButton_hk(parent, 'heal_friend', self.checkButton_hk_bools['heal_friend'], self.button_thread, 3, 1)
             text = tk.StringVar()
             text.set(self.config.get('HEAL_FRIEND', 'names'))
             add_text_command(parent, text, 12, 1, 3, 2,
@@ -441,20 +429,17 @@ class GUI:
             # CAVEBOT
             bool = tk.BooleanVar()
             self.checkButton_hk_bools['cavebot'] = bool
-            add_checkButton_hk(
-                parent, 'cavebot', self.checkButton_hk_bools['cavebot'], self.button_thread, 4, 1)
+            add_checkButton_hk(parent, 'cavebot', self.checkButton_hk_bools['cavebot'], self.button_thread, 4, 1)
             # TARGETING
             bool = tk.BooleanVar()
             self.checkButton_hk_bools['targeting'] = bool
-            add_checkButton_hk(
-                parent, 'targeting', self.checkButton_hk_bools['targeting'], self.button_thread, 5, 1)
+            add_checkButton_hk(parent, 'targeting', self.checkButton_hk_bools['targeting'], self.button_thread, 5, 1)
 
         def load_mana_train(parent):
             # enable
             bool = tk.BooleanVar()
             self.checkButton_hk_bools['mana_train'] = bool
-            add_checkButton_hk(
-                parent, 'mana_train', self.checkButton_hk_bools['mana_train'], self.button_thread, 1, 1)
+            add_checkButton_hk(parent, 'mana_train', self.checkButton_hk_bools['mana_train'], self.button_thread, 1, 1)
             # cask pos
             add_label(parent, 'cask position', 2, 0)
             cask_pos = self.config.get('MANA_TRAIN', 'cask')
@@ -490,8 +475,7 @@ class GUI:
             add_label(parent, 'soul cost: ', 5, 0)
             hotkey = tk.StringVar()
             hotkey.set(self.config.get('MANA_TRAIN', 'soul_cost'))
-            add_optionMenu(parent, hotkey, [str(i) for i in range(
-                10)], self.update_hotkeys, 'MANA_TRAIN', 'soul_cost', 5, 1)
+            add_optionMenu(parent, hotkey, [str(i) for i in range(10)], self.update_hotkeys, 'MANA_TRAIN', 'soul_cost', 5, 1)
             # food
             add_label(parent, 'food hotkey: ', 5, 2)
             hotkey = load_spell_settings('food_hotkey')[0]
@@ -527,8 +511,7 @@ class GUI:
                 bool = tk.BooleanVar()
                 self.all_bools[item[0]] = bool
                 # mapping saved hotkeys to hotkeys
-                tk_hotkey, tk_amount, tk_priority, tk_range = load_spell_settings(
-                    item[0])
+                tk_hotkey, tk_amount, tk_priority, tk_range = load_spell_settings(item[0])
                 # adding buttons
                 text = tk.StringVar()
                 text.set(self.config.get('SPELL_NAME', item[0]))
@@ -537,14 +520,10 @@ class GUI:
                 add_optionMenu(parent, tk_hotkey, self.hotkeys,
                                self.update_hotkeys, 'SAVED_HOTKEYS', item[0], i, 1)
                 # item[0] is the key for tuple
-                add_checkButton_spell(
-                    parent, item[0], 'attack', self.all_bools[item[0]], i, 2)
-                add_optionMenu(parent, tk_amount, [str(i) for i in range(
-                    10)], self.update_hotkeys, 'AMOUNT', item[0], i, 3)
-                add_optionMenu(parent, tk_priority, [str(i) for i in range(
-                    10)], self.update_hotkeys, 'PRIORITY', item[0], i, 4)
-                add_optionMenu(parent, tk_range, [str(i) for i in range(
-                    10)], self.update_hotkeys, 'RANGE', item[0], i, 5)
+                add_checkButton_spell(parent, item[0], 'attack', self.all_bools[item[0]], i, 2)
+                add_optionMenu(parent, tk_amount, [str(i) for i in range(10)], self.update_hotkeys, 'AMOUNT', item[0], i, 3)
+                add_optionMenu(parent, tk_priority, [str(i) for i in range(10)], self.update_hotkeys, 'PRIORITY', item[0], i, 4)
+                add_optionMenu(parent, tk_range, [str(i) for i in range(10)], self.update_hotkeys, 'RANGE', item[0], i, 5)
             i += 1
             add_label(parent, 'Monsters: ', i, 0)
             text = tk.StringVar()
@@ -585,8 +564,7 @@ class GUI:
                 add_text_command(parent, text, 4, 1, i, 1,
                                  self.update_textField, 'SAVED_VALUES', item[0])
                 #add_text(parent, tf, 12, 1, i, 1)
-                add_checkButton_spell(
-                    parent, item[0], 'heal', self.all_bools[item[0]], i, 2)
+                add_checkButton_spell(parent, item[0], 'heal', self.all_bools[item[0]], i, 2)
             i += 1
             for item in self.config.items('SUPPORT_COOLDOWNS'):
                 i += 1
@@ -601,8 +579,7 @@ class GUI:
                         tk_hotkey.set('None')
                 add_optionMenu(parent, tk_hotkey, self.hotkeys,
                                self.update_hotkeys, 'SAVED_HOTKEYS', item[0], i, 0)
-                add_checkButton_spell(
-                    parent, item[0], 'heal', self.all_bools[item[0]], i, 2)
+                add_checkButton_spell(parent, item[0], 'heal', self.all_bools[item[0]], i, 2)
 
         # hotkeys tab
         tab = nb.tabs['Hotkeys']
@@ -643,9 +620,8 @@ def hk_run():
     utilities.find_cds(gui)
     hk.start(gui)
 
-# def spellrotation_run(radius, rune, min_monsters, hotkey, start_coords, end_coords, config):
-
-
+# def spellrotation_run(radius, rune, min_monsters, hotkey, start_coords,
+# end_coords, config):
 def spellrotation_run(start_coords, end_coords, gui):
     targets = utilities.get_monster_list(gui)
     print(targets)
@@ -656,8 +632,8 @@ def spellrotation_run(start_coords, end_coords, gui):
 
 
 def healing_run():
-    healing.find_anchors()
-    utilities.find_battlelist()
+    healing.find_anchors(gui)
+    utilities.find_battlelist(gui)
     for item in gui.config.items('HP_AND_MANA_BAR'):
         if item[1] == '[]':
             print("GO CONFIG AND UPDATE YOUR HP/MANA SETTINGS")
@@ -668,6 +644,11 @@ def healing_run():
         healing.run(gui)
         pressed = gui.checkButton_hk_bools['healing'].get()
 
+def screenShot_thread_run():
+    print("is this running?")
+    while True:
+        screenShotter.run(gui)
+        
 
 def mana_train_run():
     # needed so mana_train can check the current mana etc.
@@ -680,8 +661,8 @@ def mana_train_run():
 
 def cavebot_run():
     '''runs cavebot engine'''
-    minimap_pos = cavebot.init_minimap()
-    battlelist_coords = utilities.find_battlelist()
+    minimap_pos = cavebot.init_minimap(gui)
+    battlelist_coords = utilities.find_battlelist(gui)
     if minimap_pos[0] is not -1:
         pressed = gui.checkButton_hk_bools['cavebot'].get()
         while pressed:
@@ -702,6 +683,9 @@ def targeting_run():
 
 gui = GUI()
 utilities.setFocusWindow(gui)
-# tmp, find better place for this. doesnt need to take the whole gui obj - just title
+screenShot_thread = threading.Thread(target=screenShot_thread_run)
+gui.root.after(1000, screenShot_thread.start())
+# tmp, find better place for this.  doesnt need to take the whole gui obj -
+# just title
 utilities.find_cds(gui)
 gui.root.mainloop()

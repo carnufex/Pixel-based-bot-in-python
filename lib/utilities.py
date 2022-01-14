@@ -1,6 +1,8 @@
 from lib import imageSearch as imgS
 import pyautogui
-import win32api, win32con, win32gui
+import win32api
+import win32con
+import win32gui
 from ctypes import windll
 import time
 import numpy as np
@@ -12,7 +14,7 @@ from lib import sendInput
 
 def has_cd(img, x, y, im=None):
     img = 'assets/cds/{}.png'.format(img)
-    no_cd = imgS.imagesearcharea(img, x, y, x+50, y+50, 0.7, im)
+    no_cd = imgS.imagesearcharea(img, x, y, x + 50, y + 50, 0.7, im)
     if no_cd[0] is not -1:
         #it has no cd, return false
         return False
@@ -39,7 +41,7 @@ def find_cds(gui):
                 if item[1].replace(" ", "_") == spell:
                     print(item[0])
                     if gui.config.has_option('ATTACK_COOLDOWNS', item[0]):
-                        coords = imgS.imagesearch(directory_in_str + filename)
+                        coords = imgS.imagesearch(directory_in_str + filename, gui.currentImage)
                         print(coords)
                         if coords[0] is not -1:
                             gui.config.set('ATTACK_COOLDOWNS', item[0], str(coords))
@@ -57,7 +59,7 @@ def find_cds(gui):
 def get_monster_list(gui):
     targets = gui.config.get('MONSTERS', 'list').split(', ')
     targets = map(lambda target:target.replace(" ", "_"), targets)
-    targets = map(lambda target: 'assets/monsters/'+target+'.png', targets)
+    targets = map(lambda target: 'assets/monsters/' + target + '.png', targets)
     return list(targets)
 
 def get_friend_list(gui):
@@ -68,10 +70,9 @@ def get_friend_list(gui):
 
 
 # Code to check if left or right mouse buttons were pressed
-
 def detect_mouse_click(arg):
-    state_left = win32api.GetKeyState(0x01)  # Left button down = 0 or 1. Button up = -127 or -128
-    state_right = win32api.GetKeyState(0x02)  # Right button down = 0 or 1. Button up = -127 or -128
+    state_left = win32api.GetKeyState(0x01)  # Left button down = 0 or 1.  Button up = -127 or -128
+    state_right = win32api.GetKeyState(0x02)  # Right button down = 0 or 1.  Button up = -127 or -128
 
     while True:
         a = win32api.GetKeyState(0x01)
@@ -134,15 +135,18 @@ def key2hex(key):
     hex_int = int(key, 16)
     return hex_int
 
-def find_battlelist():
-    battlelist_start = imgS.imagesearch('assets/battlelist/battlelist_obs.png')
+def find_battlelist(gui):
+    battlelist_start = imgS.imagesearch('assets/battlelist/battlelist_obs.png', gui.currentImage)
     if battlelist_start[0] is not -1:
         x2, y2 = pyautogui.size()
-        battlelist_end = imgS.imagesearcharea('assets/battlelist/minimize_close_obs.png', battlelist_start[0], battlelist_start[1], x2, y2)
+        battlelist_end = imgS.imagesearcharea('assets/battlelist/minimize_close_obs.png', battlelist_start[0], battlelist_start[1], x2, y2, gui.currentImage)
         if battlelist_end[0] is not -1:
-            battlelist_end = (battlelist_end[0] + battlelist_start[0]+5, y2) #relative to absolute and +5 offset 
+            battlelist_end = (battlelist_end[0] + battlelist_start[0] + 5, y2) #relative to absolute and +5 offset
             # print("BATTLE START: ", battlelist_start)
-            # print("BATTLE END: ", battlelist_end)
+                                                                                          # print("BATTLE
+                                                                                                                                                                        # END:
+                                                                                                                                                                                                                                                      # ",
+                                                                                                                                                                                                                                                                                                                                    # battlelist_end)
             return [battlelist_start, battlelist_end]
     print("BATTLE NOT FOUND")
     return [-1, -1]
@@ -151,10 +155,13 @@ def RGB_deviations(color, end_bar_color, pixel, deviation):
     R = pixel[0:1]
     G = pixel[1:2]
     B = pixel[2:3]
-    # print("RGB: {0}, {1}, {2}     color: {3}".format(R,G,B, color))
-    # print("R: {0} - {1} = {2} deviation {3}".format(color[0], R, color[0]-R, deviation))
-    # print("G: {0} - {1} = {2} deviation {3}".format(color[1], G, color[1]-G, deviation))
-    # print("B: {0} - {1} = {2} deviation {3}".format(color[2], B, color[2]-B, deviation))
+    # print("RGB: {0}, {1}, {2} color: {3}".format(R,G,B, color))
+    # print("R: {0} - {1} = {2} deviation {3}".format(color[0], R, color[0]-R,
+    # deviation))
+    # print("G: {0} - {1} = {2} deviation {3}".format(color[1], G, color[1]-G,
+    # deviation))
+    # print("B: {0} - {1} = {2} deviation {3}".format(color[2], B, color[2]-B,
+    # deviation))
     if color[0] - R >= -deviation and color[0] - R <= deviation:
         if color[1] - G >= -deviation and color[1] - G <= deviation:
             if color[2] - B >= -deviation and color[2] - B <= deviation:
@@ -189,7 +196,7 @@ def find_pixel_color(color, end_bar_color, deviation, x1, y1, x2, y2, image=None
             pixel = im[i, j]
             # pyautogui.moveTo(j+x1, i+y1)
             if RGB_deviations(color, end_bar_color, pixel, deviation):
-                match = (int(j+x1+1), int(i+y1))
+                match = (int(j + x1 + 1), int(i + y1))
                 # pyautogui.moveTo(j+x1, i+y1)
                 return match
     no_match = (-1, -1)
@@ -198,14 +205,14 @@ def find_pixel_color(color, end_bar_color, deviation, x1, y1, x2, y2, image=None
 def dev_find_color(x1, y1, x2, y2):
     image = imgS.region_grabber((x1, y1, x2, y2))
     im = np.array(image)
-    image.save('find_color_area.png')
+    #image.save('find_color_area.png')
     rows = im.shape[0]
     cols = im.shape[1]
     for i in range(rows):
         for j in range(cols):
             pixel = im[i, j]
             print(pixel)
-            pyautogui.moveTo(j+x1, i+y1)
+            pyautogui.moveTo(j + x1, i + y1)
 
 def find_countours(im):
     # Convert image to gray and blur it
@@ -230,8 +237,8 @@ def find_countours(im):
     # cv.imshow('Contours', drawing)
     # Save 1px thick line
     something, drawing_w, drawing_h = drawing.shape[::-1]
-    middle_height = int(drawing_h/2)
-    crop_drawing = drawing[middle_height-1:middle_height+1, 0:drawing_w]
+    middle_height = int(drawing_h / 2)
+    crop_drawing = drawing[middle_height - 1:middle_height + 1, 0:drawing_w]
     # cv.imwrite('tmp/contours.png', crop_drawing)
     # cv.waitKey() #awsome debugging tool
     return crop_drawing
