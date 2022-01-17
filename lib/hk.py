@@ -15,8 +15,8 @@ def ss_wpt(size):
     ss.save('tmp/wpt%s.png' % i)
 
 # The key combination to check
-ScreenShot_HK = [{keyboard.Key.shift, keyboard.KeyCode(char='a')},
-    {keyboard.Key.shift, keyboard.KeyCode(char='A')}]
+ScreenShot_HK = []#[{keyboard.Key.shift, keyboard.KeyCode(char='a')},
+    #{keyboard.Key.shift, keyboard.KeyCode(char='A')}]
 
 
 # The currently active modifiers
@@ -43,7 +43,6 @@ def on_press(key):
         if any(all(k in current for k in COMBO) for COMBO in ScreenShot_HK):
             print("saved screenshot")
             ss_wpt(500)
-
 
 def on_release(key):
     if any([key in COMBO for COMBO in ScreenShot_HK]):

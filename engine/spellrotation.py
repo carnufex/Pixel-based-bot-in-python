@@ -125,8 +125,6 @@ def spellrotation(start_coords, end_coords, gui, targets):
     start = time.time()
     config = gui.config
     active_spells = []
-
-
     # im = imgS.region_grabber(region=(start_coords[0], start_coords[1],
     # end_coords[0], end_coords[1]))
     # coords_list = imagesearcharea_array(targets, start_coords[0],
@@ -141,30 +139,40 @@ def spellrotation(start_coords, end_coords, gui, targets):
         elif item in active_spells:
             #spell has been toggled off, remove from active spells.
             active_spells.remove(item_tuple)
-
-
-
     active_spells.sort()
     for spell in active_spells:
         amount = int(config['AMOUNT'][spell[1]])
         hotkey = config['SAVED_HOTKEYS'][spell[1]]
         if coords_list[0] is not -1: #no monster on screen
-            x1, y1 = utilities.string2tuple(gui.config.get('GAMEWINDOW', 'game_start_coords'))
-            x2, y2 = utilities.string2tuple(gui.config.get('GAMEWINDOW', 'game_end_coords'))
-            game_width = x2 - x1
+            #x1, y1 = utilities.string2tuple(gui.config.get('GAMEWINDOW',
+                                                #'game_start_coords'))
+                #x2,
+                                                    #y2
+                                                                                        #=
+                                                                                                                            #utilities.string2tuple(gui.config.get('GAMEWINDOW',
+                                                                                                                                                                #'game_end_coords'))
+                                                                                                                                                                                                    #game_width
+                                                                                                                                                                                                                                        #=
+                                                                                                                                                                                                                                                                            #x2
+                                                                                                                                                                                                                                                                                                                #-
+                                                                                                                                                                                                                                                                                                                #x1
             if spell[1] == 'aoe_rune':
                 start2 = time.time()
                 cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS'][spell[1]])
                 spell_name = config.get('SPELL_NAME', spell[1]).replace(" ", "_")
                 cooldown = utilities.has_cd(spell_name, cooldown_coords[0], cooldown_coords[1], gui.currentImage)
                 if not cooldown:
-                    radius = (game_width * 0.35)
-                    best = aim_gfb(coords_list, radius)
-                    if best[1] >= amount:
-                        fire(hotkey, best[0], gui)
-                        end = time.time()
-                        print("Spell rotation time: ", end - start, end - start2)
-                        break
+                    sendInput.send_key(hotkey, title=gui.title)
+                    time.sleep(0.1)
+                    break
+                    #radius = (game_width * 0.35)
+                    #best = aim_gfb(coords_list, radius)
+                    #if best[1] >= amount:
+                        #fire(hotkey, best[0], gui)
+                        #end = time.time()
+                        #print("Spell rotation time: ", end - start, end -
+                        #start2)
+                        #break
 
             elif spell[1] == 'spell_1':
                 cooldown_coords = utilities.string2tuple(config['ATTACK_COOLDOWNS'][spell[1]])
@@ -176,7 +184,7 @@ def spellrotation(start_coords, end_coords, gui, targets):
                     # prox = proximity(coords_list, radius, x1, y1, x2, y2)
                     # if len(prox) >= amount:
                     sendInput.send_key(hotkey, title=gui.title)
-                    cooldown1 = time.time() + 6
+                    time.sleep(0.1)
                     break
 
             elif spell[1] == 'spell_2':
@@ -189,7 +197,7 @@ def spellrotation(start_coords, end_coords, gui, targets):
                     # prox = proximity(coords_list, radius, x1, y1, x2, y2)
                     # if len(prox) >= amount:
                     sendInput.send_key(hotkey, title=gui.title)
-                    cooldown2 = time.time() + 4
+                    time.sleep(0.1)
                     break
 
             elif spell[1] == 'spell_3':
@@ -202,5 +210,5 @@ def spellrotation(start_coords, end_coords, gui, targets):
                     # prox = proximity(coords_list, radius, x1, y1, x2, y2)
                     # if len(prox) >= amount:
                     sendInput.send_key(hotkey, title=gui.title)
-                    cooldown3 = time.time() + 8
+                    time.sleep(0.1)
                     break

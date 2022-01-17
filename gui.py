@@ -624,7 +624,6 @@ def hk_run():
 # end_coords, config):
 def spellrotation_run(start_coords, end_coords, gui):
     targets = utilities.get_monster_list(gui)
-    print(targets)
     pressed = gui.checkButton_hk_bools['spell_rotation'].get()
     while pressed:
         sr.spellrotation(start_coords, end_coords, gui, targets)
