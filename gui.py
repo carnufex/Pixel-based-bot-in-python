@@ -14,7 +14,7 @@ import win32gui
 from engine import cavebot, healing, manaTrain
 from engine import spellrotation as sr
 from engine import targeting
-from lib import hk, utilities, windowTitles, screenShotter
+from lib import hk, utilities, windowTitles, screenShotter, player
 
 
 class GUI:
@@ -24,6 +24,7 @@ class GUI:
         self.root.geometry('700x500')
         self.root.resizable(width=False, height=False)
         self.currentImage = None
+        self.player = player.Player()
 
         self.config_file_path = self.set_file_path()
         self.config = configparser.ConfigParser()

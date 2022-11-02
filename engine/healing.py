@@ -113,14 +113,14 @@ def get_curr(empty_key, deviation, im):
     start = START_COORDS_DICT[empty_key[0:2]]
     end = END_COORDS_DICT[empty_key[0:2]]
     color = COLOR_DICT[empty_key]
-    #print("start: {0} end: {1} color: {2}".format(start, end, color))
+    # print("start: {0} end: {1} color: {2}".format(start, end, color))
     if start != [] and end != []:
         current_px = utilities.find_pixel_color(color, COLOR_DICT[empty_key[0:2] + '_full'], deviation, start[0], start[1], end[0], start[1] + 1, im) #change end[1] to start[1]+1?
-        #print(time.time() - startT)
-                                                                                                                                                             #print(current_px)
+        # print(time.time() - startT)
+        # print(current_px)
         if current_px[0] is not -1:
             current_pc = pixels2percent(start[0], end[0], current_px[0])
-            if current_pc == None:
+            if current_pc is None:
                 current_pc = 0
             return int(current_pc)
         return None
@@ -177,6 +177,8 @@ def heal_engine(gui):
     '''healing conditions'''
     hp = get_curr('hp_empty', 10, gui.currentImage)
     mp = get_curr('mp_empty', 10, gui.currentImage)
+    gui.player.hp = hp
+    gui.player.mp = mp
     config = gui.config
     if hp is None:
         hp = 100
