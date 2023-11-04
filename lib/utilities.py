@@ -43,15 +43,15 @@ def find_cds(gui):
                     if gui.config.has_option('ATTACK_COOLDOWNS', item[0]):
                         coords = imgS.imagesearch(directory_in_str + filename, gui.currentImage)
                         print(coords)
-                        if coords[0] is not -1:
+                        if coords is not None and coords[0] is not -1:
                             gui.config.set('ATTACK_COOLDOWNS', item[0], str(coords))
                     elif gui.config.has_option('HEALING_COOLDOWNS', item[0]):
                         coords = imgS.imagesearch(directory_in_str + filename)
-                        if coords[0] is not -1:
+                        if coords is not None and coords[0] is not -1:
                             gui.config.set('HEALING_COOLDOWNS', item[0], str(coords))
                     elif gui.config.has_option('SUPPORT_COOLDOWNS', item[0]):
                         coords = imgS.imagesearch(directory_in_str + filename)
-                        if coords[0] is not -1:
+                        if coords is not None and coords[0] is not -1:
                             gui.config.set('SUPPORT_COOLDOWNS', item[0], str(coords))
     gui.update_config()
 
@@ -174,10 +174,13 @@ def RGB_deviations(color, end_bar_color, pixel, deviation):
                 return True
     return False
 
+from PIL import Image
+
 '''
 optimize by changing loop to ... algo
 look at half recursivly to find value. O(n/2).
 atm O(n)
+
 
 
 what the ... have I done here? Why not run the method twice instead of inputting 2 different colors? brain fart confirmed.
@@ -185,8 +188,8 @@ what the ... have I done here? Why not run the method twice instead of inputting
 def find_pixel_color(color, end_bar_color, deviation, x1, y1, x2, y2, image):
     #template = cv2.imread(image, 0)
     # print("called with:", color, end_bar_color, deviation, x1, y1, x2, y2)
-    im = np.array(image.crop((x1, y1, x2, y2)))
-    #image.save('hp.png')
+    im = image[int(y1):int(y2), int(x1):int(x2)]
+
     rows = im.shape[0]
     cols = im.shape[1]
     for i in range(rows):

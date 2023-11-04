@@ -11,7 +11,7 @@ def use(hotkey, gui):
     time.sleep(random.uniform(1.0, 2.0))
 
 def check_mana(gui):
-    mp = healing.get_curr('mp_empty', 10, gui)
+    mp = healing.get_curr('mp_empty', gui)
     if mp is None:
         mp = 100
     return mp

@@ -643,10 +643,16 @@ def healing_run():
     while pressed:
         healing.run(gui)
         pressed = gui.checkButton_hk_bools['healing'].get()
+        time.sleep(1/20)
 
 def screenShot_thread_run():
-    print("is this running?")
     while True:
+        # try:
+        #     fps = 1 / (time.time() - loop_time)
+        #     print(f'FPS {fps}', flush=True)
+        # except:
+        #     pass
+        # loop_time = time.time()
         screenShotter.run(gui)
         
 

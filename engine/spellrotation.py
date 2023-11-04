@@ -67,6 +67,8 @@ returns :
 best possible coordinate along with amount of hits. ((x,y), amount)
 
 '''
+
+
 def aim_gfb(list, radius):
     x = 0
     y = 0
@@ -101,6 +103,8 @@ input :
 hotkey : string with button name, e.g. 'f11'
 coords : tuple containing (x,y)
 '''
+
+
 def fire(hotkey, coords, gui):
     sendInput.send_key(hotkey, title=gui.title)
     if coords is not 0:
@@ -124,8 +128,10 @@ def proximity(lista, range, x1, y1, x2, y2):
 '''
 
 '''
+
+
 def spellrotation(start_coords, end_coords, gui, targets):
-    start = time.time()
+    # start = time.time()
     config = gui.config
     active_spells = []
     # im = imgS.region_grabber(region=(start_coords[0], start_coords[1],
@@ -135,6 +141,7 @@ def spellrotation(start_coords, end_coords, gui, targets):
     coords_list = [(1, 1)]
     # look for all active spells and add them to active spell list along with
     # priority
+    time.sleep(0.2)
     for item in gui.all_spells_dict['attack']:
         item_tuple = (config['PRIORITY'][item], item)
         if gui.all_bools[item].get() is True:
@@ -154,7 +161,7 @@ def spellrotation(start_coords, end_coords, gui, targets):
             # game_width = x2-x1
 
             if spell[1] == 'aoe_rune':
-                start2 = time.time()
+                # start2 = time.time()
                 cooldown_coords = utilities.string2tuple(
                     config['ATTACK_COOLDOWNS'][spell[1]])
                 spell_name = config.get(
@@ -194,7 +201,7 @@ def spellrotation(start_coords, end_coords, gui, targets):
                         'assets/cds/utito_active.png', 2340, 300, 2390, 350,
                         gui.currentImage)
                     # print(utitoActive, utitoCD, gui.player.mp)
-                    if (utitoActive[0] == -1 and not utitoCD[0] == -1 and gui.player.mp >= 60):
+                    if (utitoActive[0] == -1 and not utitoCD[0] == -1 and gui.player.mp >= 40):
                         sendInput.send_key(
                             'f10', title=gui.title, )
                         time.sleep(0.1)

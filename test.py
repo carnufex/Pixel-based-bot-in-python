@@ -25,7 +25,7 @@ saveDC.SelectObject(saveBitMap)
 # or just the client area. 
 #result = windll.user32.PrintWindow(hwnd, saveDC.GetSafeHdc(), 1)
 result = windll.user32.PrintWindow(hwnd, saveDC.GetSafeHdc(), 0)
-print(result)
+# print(result)
 
 bmpinfo = saveBitMap.GetInfo()
 bmpstr = saveBitMap.GetBitmapBits(True)
